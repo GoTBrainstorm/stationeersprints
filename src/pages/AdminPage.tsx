@@ -98,7 +98,9 @@ export default function AdminPage() {
                 {bp.author || 'anonymous'} · {bp.nodeCount} devices · {new Date(bp.createdAt).toLocaleString()}
               </span>
               {bp.description && <p className="small">{bp.description}</p>}
-              <Link to={`/b/${bp.id}`} className="button">
+              {/* New tab: the admin token lives in this component's state, so
+                  navigating away here and coming back would empty the queue. */}
+              <Link to={`/b/${bp.id}`} className="button" newTab>
                 Open
               </Link>
             </div>
