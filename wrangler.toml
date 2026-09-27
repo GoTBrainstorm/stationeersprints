@@ -2,20 +2,13 @@ name = "stationeersprints"
 main = "worker/index.ts"
 compatibility_date = "2026-09-01"
 
-# The Worker is only reachable through the real domain. Turnstile origin checks
-# and any Cloudflare Access rules are bound to that hostname, and a live
-# *.workers.dev alias would route around both.
+# Disable *.workers.dev alias for security purposes
 workers_dev = false
 
-# Version (preview) URLs default to following workers_dev, but pin it rather than
-# inherit a server-side default: a version URL is a public *.workers.dev host bound
-# to the production D1 and R2, and it routes around Turnstile and the Access rule on
-# /admin for the same reason the line above exists. The cost is that CI cannot
-# smoke-test an uploaded version before promoting it — see .github/workflows/.
+# Disable preview URLs
 preview_urls = false
 
-# The built SPA. `vite build` must run before `wrangler deploy`; `npm run
-# deploy` chains them.
+# The SPA
 [assets]
 directory = "./dist"
 binding = "ASSETS"
@@ -26,22 +19,19 @@ not_found_handling = "single-page-application"
 # Worker still hands the asset response back for it.
 run_worker_first = ["/api/*", "/b/*", "/storage/*"]
 
+# Database
 [[d1_databases]]
 binding = "DB"
 database_name = "stationeersprints"
-# Replace with the id printed by `wrangler d1 create stationeersprints`.
 database_id = "ba4d299c-5c5a-4c6e-b110-938b0c5a5ddb"
 migrations_dir = "worker/migrations"
 
+# Blobs
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "stationeersprints"
 
-# This block is the only source of truth for the Worker's vars. Every deploy and
-# every `versions upload` replaces the live vars wholesale with what is committed
-# here, so a value edited in the dashboard lasts exactly until the next release.
-# Change them in this file, not there. (Secrets are the opposite: a deploy never
-# touches them.)
+# Variables
 [vars]
 SITE_ORIGIN = "https://stationeersprints.com"
 # Bucket's custom domain. Previews and blueprint JSON are fetched from here
@@ -56,14 +46,16 @@ REQUIRE_TURNSTILE = "true"
 #   wrangler secret put ADMIN_TOKEN
 #   wrangler secret put IP_PEPPER
 #
-# Local overrides go in .dev.vars (gitignored), which `wrangler dev` reads on
-# top of [vars]. Set R2_PUBLIC_ORIGIN= empty there: there is no cdn subdomain in
-# front of miniflare's bucket, so the Worker serves /storage/* itself.
-# Deliberately not an [env.dev] section — named environments do not inherit
-# [vars] or bindings, so one would have to restate every binding above.
+# Local overrides go in .dev.vars (gitignored), which `wrangler dev` reads on top of [vars].
 
+# Publish rate limiting
 [[unsafe.bindings]]
 name = "PUBLISH_BURST"
 type = "ratelimit"
 namespace_id = "1"
 simple = { limit = 3, period = 60 }
+
+# Enable observability
+[observability.logs]
+enabled = true
+invocation_logs = true
