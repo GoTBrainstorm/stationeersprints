@@ -1,0 +1,34 @@
+version: 2
+
+updates:
+  # There is no CI, so every PR here has to be verified by hand with `npm run check`.
+  # Weekly cadence and aggressive grouping keep that to one or two reviews a week.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # Bumping react without react-dom (or @types/react without both) breaks the
+      # build, so these only make sense as a single PR.
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      cloudflare:
+        patterns:
+          - wrangler
+          - "@cloudflare/*"
+      dev-minor-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      prod-minor-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
