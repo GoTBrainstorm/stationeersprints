@@ -1,0 +1,51 @@
+name = "stationeersprints"
+main = "worker/index.ts"
+compatibility_date = "2026-09-01"
+
+# The Worker is only reachable through the real domain. Turnstile origin checks
+# and any Cloudflare Access rules are bound to that hostname, and a live
+# *.workers.dev alias would route around both.
+workers_dev = false
+
+# The built SPA. `vite build` must run before `wrangler deploy`; `npm run
+# deploy` chains them.
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+# Any path that isn't a file is the SPA — the client router decides what it is.
+not_found_handling = "single-page-application"
+# Everything else is served straight from the edge without waking the Worker.
+# /b/* is here only so published pages get their OpenGraph tags injected; the
+# Worker still hands the asset response back for it.
+run_worker_first = ["/api/*", "/b/*", "/storage/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "stationeersprints"
+# Replace with the id printed by `wrangler d1 create stationeersprints`.
+database_id = "REPLACE_ME"
+migrations_dir = "worker/migrations"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "stationeersprints"
+
+[vars]
+SITE_ORIGIN = "https://stationeersprints.com"
+# Bucket's custom domain. Previews and blueprint JSON are fetched from here
+# directly, so a 24-card gallery costs two Worker requests instead of twenty-six.
+R2_PUBLIC_ORIGIN = "https://cdn.stationeersprints.com"
+# Public site key; the matching secret is set with `wrangler secret put TURNSTILE_SECRET`.
+TURNSTILE_SITE_KEY = ""
+REQUIRE_TURNSTILE = "false"
+
+# Secrets — never in this file. See worker/README.md:
+#   wrangler secret put TURNSTILE_SECRET
+#   wrangler secret put ADMIN_TOKEN
+#   wrangler secret put IP_PEPPER
+#
+# Local overrides go in .dev.vars (gitignored), which `wrangler dev` reads on
+# top of [vars]. Set R2_PUBLIC_ORIGIN= empty there: there is no cdn subdomain in
+# front of miniflare's bucket, so the Worker serves /storage/* itself.
+# Deliberately not an [env.dev] section — named environments do not inherit
+# [vars] or bindings, so one would have to restate every binding above.

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stationeersprints — Stationeers blueprint editor</title>
+    <!--
+      Defaults for every route. /b/:id is rewritten by the Worker on the way
+      out, which removes these first — see worker/og.ts.
+    -->
+    <meta name="description" content="Plan Stationeers bases: wire up devices, pipes and logic, then share the diagram with a link." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Stationeersprints" />
+    <meta property="og:title" content="Stationeersprints — Stationeers blueprint editor" />
+    <meta property="og:description" content="Plan Stationeers bases: wire up devices, pipes and logic, then share the diagram with a link." />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

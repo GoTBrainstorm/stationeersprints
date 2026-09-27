@@ -1,0 +1,985 @@
+:root {
+  --bg: #15171b;
+  --panel: #1e2127;
+  --panel-2: #262a31;
+  --border: #353a43;
+  --text: #dde1e7;
+  --muted: #8b929e;
+  --accent: #f08c2e;
+  --accent-2: #ffb061;
+  --power: #e05a4f;
+  --data: #4fbf6a;
+  --powerdata: #e3c341;
+  --pipe: #4f8fe0;
+  --liquid: #3fc9d6;
+  --chute: #a0a4ab;
+  --other: #b07fe0;
+  --logic: #f2f2f2;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1b1208;
+  font-weight: 600;
+}
+button.primary:hover {
+  background: var(--accent-2);
+}
+button.active {
+  border-color: var(--accent);
+  color: var(--accent-2);
+}
+.icon-button {
+  padding: 0 8px;
+  line-height: 1.6;
+}
+
+input,
+select,
+textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  width: 100%;
+  min-width: 0;
+}
+textarea {
+  resize: vertical;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 1px solid var(--accent);
+  border-color: var(--accent);
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+fieldset:disabled input,
+fieldset:disabled select,
+fieldset:disabled textarea {
+  opacity: 0.85;
+}
+
+.muted {
+  color: var(--muted);
+}
+.mono,
+.code {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 12px;
+}
+.pre {
+  white-space: pre-wrap;
+}
+
+/* Layout ------------------------------------------------------------------ */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.canvas {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+.brand span {
+  color: var(--accent);
+}
+.toolbar-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.toolbar-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+}
+.badge {
+  background: var(--panel-2);
+  border: 1px solid var(--accent);
+  color: var(--accent-2);
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+.legend {
+  display: inline-block;
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin: 0 3px 0 10px;
+  background: var(--port-color);
+}
+.legend.logic {
+  background: repeating-linear-gradient(90deg, var(--logic) 0 3px, transparent 3px 6px);
+}
+
+/* Palette ----------------------------------------------------------------- */
+.palette {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+.palette-search {
+  margin: 8px;
+  width: auto;
+}
+.palette-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 4px 12px;
+}
+.palette details summary {
+  cursor: pointer;
+  padding: 5px 6px;
+  font-weight: 600;
+  color: var(--accent-2);
+  user-select: none;
+}
+.palette .count {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+.palette ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: grab;
+  font-size: 13px;
+}
+.palette-item:hover {
+  background: var(--panel-2);
+}
+.palette-item img,
+.palette-icon-placeholder {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.palette-icon-placeholder {
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+.palette-tool-swatch {
+  width: 24px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin: 5px 0;
+}
+.palette-tool-swatch.CableNetwork {
+  background: var(--powerdata);
+}
+.palette-tool-swatch.PipeNetwork {
+  background: var(--pipe);
+}
+.palette-tool-swatch.LiquidNetwork {
+  background: var(--liquid);
+}
+.palette-tool-swatch.note {
+  background: #d8c56a;
+}
+.palette-tool-swatch.zone {
+  border: 2px dashed #5a7da8;
+}
+
+/* Inspector --------------------------------------------------------------- */
+.inspector {
+  width: 330px;
+  overflow-y: auto;
+  padding: 12px 14px 24px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+}
+.inspector h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+.inspector h3,
+.shopping h3 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-2);
+}
+.inspector section {
+  margin-top: 8px;
+}
+.inspector-device {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.inspector-device img {
+  width: 48px;
+  height: 48px;
+}
+.description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+/* Collapsed explainer under an inspector heading. A <details> keeps working
+   inside the read-only <fieldset disabled>, where a <button> would not. */
+.help {
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+.help summary {
+  cursor: pointer;
+  color: var(--muted);
+  user-select: none;
+}
+.help summary:hover {
+  color: var(--accent-2);
+}
+.help p {
+  margin: 6px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+  line-height: 1.5;
+}
+.row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.row-label {
+  color: var(--muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row input[type='checkbox'] {
+  justify-self: start;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+.input-field {
+  display: flex;
+  gap: 4px;
+}
+.add-value {
+  margin-top: 4px;
+}
+.port-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+.port-list li {
+  padding: 2px 0;
+}
+.port-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--port-color);
+  margin-right: 6px;
+}
+.recipes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.recipes th,
+.recipes td {
+  text-align: left;
+  padding: 3px 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.help ul {
+  padding-left: 18px;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Port colors ------------------------------------------------------------- */
+.port-Power {
+  --port-color: var(--power);
+}
+.port-Data {
+  --port-color: var(--data);
+}
+.port-PowerAndData {
+  --port-color: var(--powerdata);
+}
+.port-Pipe {
+  --port-color: var(--pipe);
+}
+.port-PipeLiquid {
+  --port-color: var(--liquid);
+}
+.port-Chute {
+  --port-color: var(--chute);
+}
+.port-Other {
+  --port-color: var(--other);
+}
+
+/* Nodes ------------------------------------------------------------------- */
+.device-node {
+  width: 210px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.device-node.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.device-node.unknown {
+  border-style: dashed;
+  opacity: 0.8;
+}
+.device-node.builtin {
+  width: 150px;
+  border-radius: 20px;
+  background: var(--panel-2);
+  padding: 6px 12px;
+}
+.device-node.builtin .device-icon {
+  display: none;
+}
+.device-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.device-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.device-icon.placeholder {
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+.device-titles {
+  min-width: 0;
+}
+.device-title {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.25;
+}
+.device-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+}
+.device-summary {
+  margin-top: 6px;
+  padding: 4px 6px;
+  background: var(--bg);
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--accent-2);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  word-break: break-word;
+}
+.device-note {
+  margin-top: 6px;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+.react-flow__handle.port {
+  width: 11px;
+  height: 11px;
+  background: var(--port-color);
+  border: 2px solid var(--bg);
+}
+/* Hover adds the scale but must keep each side's own base translate: overriding it
+   shifts the handle out from under the cursor, which unhovers it, so the handle
+   oscillates and can't be grabbed. */
+.react-flow__handle.port:hover {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+.react-flow__handle-right.port:hover {
+  transform: translate(50%, -50%) scale(1.3);
+}
+.react-flow__handle-bottom.port:hover {
+  transform: translate(-50%, 50%) scale(1.3);
+}
+.port-label {
+  position: absolute;
+  font-size: 9px;
+  color: var(--muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Side labels sit outside the node so they never cover the summary. */
+.port-label-left {
+  right: 12px;
+  top: -3px;
+}
+.port-label-right {
+  left: 12px;
+  top: -3px;
+}
+.port-label-bottom {
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.react-flow__handle.logic-handle {
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+}
+
+.note-node {
+  width: 100%;
+  height: 100%;
+  min-width: 140px;
+  min-height: 60px;
+  background: #3b3620;
+  border: 1px solid #6d6334;
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: #f2e8b8;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow: hidden;
+  position: relative;
+}
+.note-node.selected {
+  border-color: var(--accent);
+}
+.note-step {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #1b1208;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+.note-text {
+  white-space: pre-wrap;
+}
+
+.zone-node {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--zone-color);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--zone-color) 8%, transparent);
+}
+.zone-node.selected {
+  border-style: solid;
+}
+/* Frozen zones are inert: not draggable, not selectable (see Canvas in App.tsx),
+   so they must not advertise a grab cursor. */
+.zone-node.locked {
+  cursor: default;
+}
+.zone-title {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  color: var(--zone-color);
+}
+.zone-lock {
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Edges ------------------------------------------------------------------- */
+.react-flow__edge-path {
+  stroke-width: 3;
+}
+.edge-Power .react-flow__edge-path {
+  stroke: var(--power);
+}
+.edge-Data .react-flow__edge-path {
+  stroke: var(--data);
+}
+.edge-PowerAndData .react-flow__edge-path {
+  stroke: var(--powerdata);
+}
+.edge-Pipe .react-flow__edge-path {
+  stroke: var(--pipe);
+  stroke-width: 5;
+}
+.edge-PipeLiquid .react-flow__edge-path {
+  stroke: var(--liquid);
+  stroke-width: 5;
+}
+.edge-Chute .react-flow__edge-path {
+  stroke: var(--chute);
+  stroke-width: 6;
+}
+.edge-Other .react-flow__edge-path {
+  stroke: var(--other);
+}
+/* Connections of a network node the author has dimmed. `opacity` and not `filter`,
+   because the PNG export only inlines the properties in inlineSvgPaint's list. */
+.edge-dim .react-flow__edge-path {
+  opacity: 0.25;
+}
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--accent-2);
+}
+/* A dimmed line the user has actually clicked comes back, or it can't be inspected or deleted. */
+.react-flow__edge.selected.edge-dim .react-flow__edge-path {
+  opacity: 1;
+}
+.edge-logic .react-flow__edge-path {
+  stroke: var(--logic);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  opacity: 0.8;
+}
+.edge-logic .react-flow__edge-text {
+  fill: var(--text);
+  font-size: 11px;
+}
+.edge-logic .react-flow__edge-textbg {
+  fill: var(--bg);
+}
+
+/* Modal, toast, errors ---------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px 20px;
+  width: min(920px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h2 {
+  margin: 0;
+}
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.example-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding: 12px;
+  background: var(--panel-2);
+  border-radius: 6px;
+}
+.example-card span:last-child {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.stage {
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: #2f4a33;
+  color: #9fe0a8;
+}
+.stage-mid {
+  background: #4a3a22;
+  color: #f2c07e;
+}
+.stage-earlymid {
+  background: #3d4526;
+  color: #d4e08e;
+}
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-2);
+  border: 1px solid var(--accent);
+  padding: 8px 16px;
+  border-radius: 6px;
+  z-index: 200;
+}
+.fatal {
+  padding: 40px;
+  max-width: 640px;
+  margin: auto;
+}
+
+/* Routed pages (gallery, admin) — no canvas, so they lay out on their own. */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.page-body {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+/* An <a> that has to sit in a toolbar next to real buttons. */
+a.button {
+  display: inline-block;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+a.button:hover {
+  border-color: var(--accent);
+}
+
+/* Publish dialog ---------------------------------------------------------- */
+.modal-narrow {
+  width: min(560px, 92vw);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.checkbox {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 12px 0;
+  cursor: pointer;
+}
+.checkbox input {
+  margin-top: 3px;
+  width: auto;
+}
+.checkbox small {
+  display: block;
+  line-height: 1.4;
+}
+.small {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.error {
+  color: #ff9c8a;
+  line-height: 1.5;
+}
+/* The management key warning. Deliberately loud: there is no way to recover it. */
+.notice {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+.notice p {
+  margin: 6px 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.notice input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+.turnstile {
+  margin: 12px 0;
+  min-height: 65px;
+}
+
+/* Gallery ----------------------------------------------------------------- */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.gallery-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+.gallery-card:hover {
+  border-color: var(--accent);
+}
+.gallery-card img,
+.gallery-thumb-empty {
+  /* Fixed box, contained image: previews vary wildly in aspect ratio and a
+     grid that reflows around them is unreadable. */
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  background: var(--bg);
+  border-radius: 4px;
+}
+.gallery-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* Moderation queue and the "blueprints you published" list ----------------- */
+.admin-row,
+.published-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.admin-row img {
+  width: 160px;
+  height: 100px;
+  object-fit: contain;
+  background: var(--bg);
+  border-radius: 4px;
+}
+.admin-row-body,
+.published-row-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.admin-row-actions,
+.published-row-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Collapsed by default: the common case is managing what is already listed. */
+.restore {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.restore summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Help page ---------------------------------------------------------------
+   Shared by /help and the toolbar dialog, so it must look right both full-width
+   and inside a modal — hence a max measure rather than a fixed width. */
+.doc {
+  max-width: 68ch;
+  line-height: 1.6;
+}
+.doc h3 {
+  margin: 28px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.doc h3:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.doc p,
+.doc li {
+  margin: 8px 0;
+}
+.doc ul {
+  padding-left: 20px;
+}
+.doc .lead {
+  font-size: 15px;
+  color: var(--muted);
+}
+/* There is no global anchor style — the rest of the app navigates with buttons — so
+   the prose links here would otherwise fall back to unreadable default blue on dark. */
+.doc a {
+  color: var(--accent-2);
+}
+.doc code {
+  background: var(--panel-2);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 12px;
+}
+.doc kbd {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 5px;
+  font-family: inherit;
+  font-size: 12px;
+}
+.restore input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+/* Shopping list ------------------------------------------------------------ */
+.shopping-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.shopping-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.shopping-icon {
+  width: 24px;
+  padding-right: 0;
+}
+.shopping-table img {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+/* Right-aligned so the quantities line up as a column you can read down. */
+.shopping-qty {
+  width: 3.5em;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--accent-2);
+}
+.shopping-caveat {
+  margin-top: 12px;
+}
+

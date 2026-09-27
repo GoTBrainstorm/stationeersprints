@@ -1,0 +1,18 @@
+{
+  "categories": [
+    { "name": "Logic", "match": ["StructureLogic", "CircuitHousing", "StructureConsole", "Button", "Dial", "Computer", "PidController", "Diode", "Klaxon", "PressurePlate", "Camera"] },
+    { "name": "Sensors", "match": ["Sensor", "Analy", "Meter", "Tracker", "WeatherStation"] },
+    { "name": "Power", "match": ["Solar", "Battery", "Generator", "Transformer", "AreaPowerControl", "PowerTransmitter", "Turbine", "Stirling", "Pylon", "PowerConnector", "PowerUmbilical", "CableFuse"] },
+    { "name": "Liquids", "match": ["Liquid", "Water", "IceCrusher", "EvaporationChamber", "CondensationChamber"] },
+    { "name": "Atmospherics", "match": ["Vent", "Filtration", "Mixer", "Pump", "Regulator", "Valve", "Tank", "AirConditioner", "Cooler", "Heater", "Radiator", "Electrolyzer", "Nitrolyzer", "Combustor", "Igniter", "Sequester", "HeatExchange", "PortablesConnector"] },
+    { "name": "Manufacturing", "match": ["Furnace", "Fabricator", "Printer", "Centrifuge", "Lathe", "Autolathe", "Recycler", "Bender", "Grinder", "Oven", "Manufactory", "Kiln", "Packag", "Miner", "Drill"] },
+    { "name": "Logistics", "match": ["Chute", "Sorter", "Stacker", "Unloader", "Bin", "Vending", "RobotArm", "RoboticArm", "Rail", "Hopper", "Loader", "Locker", "Shelf", "CargoStorage", "SDBSilo", "Fridge", "SuitStorage", "Elevator"] },
+    { "name": "Agriculture", "match": ["Hydroponic", "GrowLight", "Harvie", "Larre", "Fermenter", "Composter"] },
+    { "name": "Doors & Airlocks", "match": ["Door", "Airlock", "Hanger", "Hangar", "Shutter", "Hatch", "AccessBridge"] },
+    { "name": "Lighting", "match": ["Light", "Lamp"] },
+    { "name": "Communication", "match": ["SatelliteDish", "Telescope", "TraderWaypoint", "Beacon"] },
+    { "name": "Rocketry", "match": ["Rocket", "Engine", "Fuselage", "Capsule", "Umbilical", "CrewModule", "LandingPad", "DockPort"] },
+    { "name": "Crew & furniture", "match": ["Bench", "Chair", "Bed", "Sleeper", "Shower", "CryoTube", "DrinkingFountain", "BasketHoop", "Sign"] }
+  ],
+  "hidden": ["StructurePipeLabel"]
+}

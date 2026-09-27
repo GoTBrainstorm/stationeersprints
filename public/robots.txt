@@ -1,0 +1,7 @@
+# Published pages under /b/ are deliberately *not* disallowed: social crawlers
+# honour this file, and blocking them would defeat the OpenGraph tags the Worker
+# injects. Blueprints that aren't in the gallery are instead served with
+# `X-Robots-Tag: noindex`, so previews still render but nothing gets indexed.
+User-agent: *
+Disallow: /admin
+Allow: /

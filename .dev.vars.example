@@ -1,0 +1,17 @@
+# Local overrides for `wrangler dev`, layered on top of [vars] in wrangler.toml.
+# Copy to .dev.vars (gitignored) and edit. Never commit the real file.
+
+SITE_ORIGIN=http://localhost:5173
+
+# Must be empty locally: there is no CDN domain in front of miniflare's bucket,
+# so the Worker serves /storage/* from it instead.
+R2_PUBLIC_ORIGIN=
+
+IP_PEPPER=local-development-pepper
+ADMIN_TOKEN=local-admin
+
+# Leave false unless you have also set TURNSTILE_SECRET — verification fails
+# closed, so a half-configured Turnstile blocks every publish.
+REQUIRE_TURNSTILE=false
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET=
