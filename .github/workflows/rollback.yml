@@ -1,0 +1,80 @@
+# Put a previous Worker version back at 100% traffic.
+#
+# List candidates with `npx wrangler versions list` — only recent, deployable
+# versions can be targeted. Gated on the same `production` environment as a release,
+# so production still never changes without an approval; the approver is one click
+# away and the invariant is worth keeping during an incident.
+#
+# This rolls back CODE ONLY. D1 migrations are not reversed, which is why migrations
+# must stay backward compatible — see worker/README.md, "Releasing".
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_id:
+        description: Worker version id to restore (npx wrangler versions list)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://stationeersprints.com
+    # Same group as release.yml's promote job. Different workflows, but the group name
+    # is what serialises them — otherwise a rollback can race a promotion and the last
+    # writer silently wins.
+    concurrency:
+      group: release-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore version
+        env:
+          VERSION_ID: ${{ inputs.version_id }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          # Fail on a typo here rather than letting wrangler interpret it.
+          if ! printf '%s' "$VERSION_ID" | grep -qiE '^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'; then
+            echo "::error::'$VERSION_ID' is not a version id. Run 'npx wrangler versions list'."
+            exit 1
+          fi
+
+          npx wrangler versions deploy "${VERSION_ID}@100" \
+            --yes \
+            --message "Rollback to ${VERSION_ID} (run ${RUN_ID})"
+
+      - name: Verify production
+        run: |
+          set -euo pipefail
+
+          origin=$(grep -E '^[[:space:]]*SITE_ORIGIN[[:space:]]*=' wrangler.toml \
+                   | head -n1 | sed -E 's/^[^"]*"([^"]*)".*/\1/')
+
+          curl -fsS --retry 5 --retry-delay 3 --retry-all-errors -o /dev/null "$origin/"
+          curl -fsS --retry 5 --retry-delay 3 --retry-all-errors \
+            "$origin/api/health" | jq -e '.ok == true' > /dev/null
+
+          # Only reported, not asserted: [vars] travel with the version, so a restored
+          # version carries the config it was uploaded with — which may legitimately
+          # differ from what is committed on main today.
+          echo "Restored. Production config now reads:"
+          curl -fsS "$origin/api/config" | jq .

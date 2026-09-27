@@ -1,8 +1,9 @@
 version: 2
 
+# CI runs the full check on every PR, but merging to main queues a production release
+# for approval — so everything here still wants a human look before it lands. Weekly
+# cadence, one shared day, and aggressive grouping keep that to one sitting a week.
 updates:
-  # There is no CI, so every PR here has to be verified by hand with `npm run check`.
-  # Weekly cadence and aggressive grouping keep that to one or two reviews a week.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -32,3 +33,24 @@ updates:
         update-types:
           - minor
           - patch
+
+  # The workflows pin actions/checkout and actions/setup-node by commit SHA rather
+  # than by tag, because a tag is mutable and these run with a Cloudflare API token
+  # in scope. Dependabot is what makes that maintainable: it rewrites both the SHA
+  # and the trailing `# vX.Y.Z` comment, so the pin stays readable without anyone
+  # hand-resolving tags. Don't unpin to tags to save it the trouble.
+  #
+  # `directory: /` is the convention for this ecosystem — Dependabot always reads
+  # .github/workflows, it is not a path to them.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 2
+    groups:
+      # Two actions across three workflows, and a bump is never interesting on its
+      # own. One PR a week at most.
+      actions:
+        patterns:
+          - "*"

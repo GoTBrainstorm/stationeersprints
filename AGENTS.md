@@ -12,12 +12,19 @@ npm test         # vitest run — 10 files, ~115 tests, <1s. Run this after any 
 npm run lint     # oxlint
 npm run build    # tsc -b && vite build → dist/
 npm run check    # the full gate: vitest && oxlint && tsc -b
-npm run deploy   # build, then wrangler deploy
+npm run deploy   # build, then wrangler deploy — BYPASSES the release gate, see below
 npm run extract  # regenerate public/data/ from a Stationeers install (rarely needed)
 ```
 
-There is no CI. `npm run check` is the full gate — it runs all three because each catches things
-the others don't.
+CI runs `npm test`, `npm run lint` and `npm run build` on every pull request
+(`.github/workflows/ci.yml`). That trio is a superset of `npm run check`, since `build` is
+`tsc -b && vite build`. Locally, `npm run check` is still the one command to run — same gate.
+
+**Releases are gated on a human.** Merging to `main` builds once and parks the artifact on
+Cloudflare as a Worker *version* at 0% traffic; a second job then waits for an approval in the
+Actions UI before promoting that exact version to 100%. `npm run deploy` goes straight to
+production with no approval and no migration step — after the one-time bootstrap it is an
+emergency tool, not the normal path. The runbook is in [`worker/README.md`](worker/README.md).
 
 **`npm run dev:api` serves a build, not your source.** `wrangler.toml` points `[assets] directory`
 at `./dist`, so `wrangler dev` hands out whatever `npm run build` last wrote — it doesn't compile,
@@ -102,6 +109,15 @@ Node extractor under `tools/`. Types only.
 under `tsconfig.worker.json` as well as `tsconfig.app.json`: the Worker validates uploads with the
 editor's own `validate()`, so the two can never drift. `npx tsc -b` is what catches a violation.
 Share-link helpers live in `src/model/shareLink.ts` for exactly this reason — they need lz-string.
+
+**`wrangler.toml`'s `[vars]` block is the only source of truth for the Worker's vars.** Every
+deploy — and every `versions upload` the release workflow makes — replaces the live vars wholesale
+with what is committed there, so a value edited in the Cloudflare dashboard lasts exactly until the
+next release. Secrets are the exact opposite: a deploy never touches them. This bites hardest with
+Turnstile, because both halves fail *open* — `turnstileRequired()` (`worker/turnstile.ts:11`) is
+`REQUIRE_TURNSTILE === 'true' && !!TURNSTILE_SECRET`, so a reverted var or an unset secret doesn't
+raise anything, it just quietly stops challenging. That is why the release workflow asserts
+`/api/config` against this file after promoting.
 
 **Published blueprints are immutable.** Only `visibility` ever changes after a publish. Links people
 have shared must keep meaning what they meant; "editing" means publishing a new one. The runbook in
@@ -218,4 +234,5 @@ worker/                publishing backend (see its own README.md)
 tools/extract/         game → catalog.json pipeline (see its own README.md)
 public/data/           GENERATED: catalog.json + 338 icons
 wrangler.toml          Worker, D1, R2 and asset config
+.github/workflows/     ci.yml (PRs), release.yml (gated deploy), rollback.yml
 ```

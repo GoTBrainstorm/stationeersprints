@@ -1,0 +1,171 @@
+# Release to Cloudflare, with a manual approval gate.
+#
+#   build    — checks, then `wrangler versions upload`. Cloudflare stores the exact
+#              artifact as a Worker version at 0% traffic. Production is untouched.
+#   promote  — waits for an approver on the `production` environment, then applies D1
+#              migrations and promotes *that same version id* to 100%.
+#
+# Because promote deploys a version id rather than rebuilding, what goes live is
+# byte-for-byte what `build` tested.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version_id: ${{ steps.upload.outputs.version_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      # dist/ is gitignored and [assets] points at it, so the build has to happen in
+      # the same job as the upload.
+      - run: npm run build
+
+      - name: Upload Worker version
+        id: upload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Via env, never interpolated into the run: body — `${{ }}` inside a script
+          # is the Actions injection sink and this repo is public. workflow_dispatch
+          # has no head_commit, hence the git log fallback.
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          RUN_ID: ${{ github.run_id }}
+          # Per-step, not job-wide: wrangler *appends* to this file, so a job-wide
+          # path would accumulate entries from every wrangler call.
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-out.json
+        run: |
+          set -euo pipefail
+
+          subject=$(printf '%s' "${HEAD_COMMIT_MESSAGE:-$(git log -1 --pretty=%s)}" | head -n1)
+
+          # --strict fails the upload when the deployed config has drifted from this
+          # file, instead of silently overwriting it. That matters because an upload
+          # replaces every [vars] value with what is committed here (secrets are never
+          # touched), so drift would otherwise be reverted without a word.
+          npx wrangler versions upload \
+            --strict \
+            --tag "${GITHUB_SHA::8}-${RUN_ID}" \
+            --message "${subject:0:900}"
+
+          if [ ! -f "$WRANGLER_OUTPUT_FILE_PATH" ]; then
+            echo "::error::wrangler wrote no output file; cannot identify the uploaded version"
+            exit 1
+          fi
+
+          # select() is required: the file is ND-JSON holding several entry types
+          # (wrangler-session, version-upload, command-failed, …), so a bare
+          # .version_id would also emit nulls from the other lines.
+          vid=$(jq -r 'select(.type == "version-upload") | .version_id' \
+                  "$WRANGLER_OUTPUT_FILE_PATH" | tail -n1)
+
+          # A --strict abort records a null id rather than throwing, so check.
+          if [ -z "$vid" ] || [ "$vid" = "null" ]; then
+            echo "::error::upload did not produce a version id"
+            exit 1
+          fi
+
+          echo "version_id=$vid" >> "$GITHUB_OUTPUT"
+          echo "Uploaded version $vid at 0% traffic. Production is unchanged until promoted." \
+            >> "$GITHUB_STEP_SUMMARY"
+
+  promote:
+    needs: build
+    runs-on: ubuntu-latest
+    # The gate. `production` must have Required reviewers configured; this job then
+    # waits in the Actions UI until one of them approves.
+    environment:
+      name: production
+      url: https://stationeersprints.com
+    # On the job, not the workflow. At workflow level an unapproved release would also
+    # block *builds* for later commits, and GitHub keeps only one pending run per
+    # group — a third push would discard the second commit's version entirely.
+    concurrency:
+      group: release-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Only to get the lockfile-pinned wrangler. `versions deploy` needs no build and
+      # no dist/ — the assets were uploaded with the version.
+      - run: npm ci
+
+      # Before the promotion, so the new version never meets an old schema. The cost is
+      # that the *old* version briefly serves against the new schema, which is why
+      # migrations must stay backward compatible — see worker/README.md, "Releasing".
+      - name: Apply D1 migrations
+        run: npm run db:migrate
+
+      - name: Promote version to 100%
+        env:
+          VERSION_ID: ${{ needs.build.outputs.version_id }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          npx wrangler versions deploy "${VERSION_ID}@100" \
+            --yes \
+            --message "Approved release ${GITHUB_SHA::8} (run ${RUN_ID})"
+
+      # There is no staging and no preview URL (workers_dev = false), so this is the
+      # only smoke test. It runs against the real site, after the promotion — a failure
+      # here means: roll back with the Rollback workflow.
+      - name: Verify production
+        run: |
+          set -euo pipefail
+
+          origin=$(grep -E '^[[:space:]]*SITE_ORIGIN[[:space:]]*=' wrangler.toml \
+                   | head -n1 | sed -E 's/^[^"]*"([^"]*)".*/\1/')
+          echo "Verifying $origin"
+
+          curl -fsS --retry 5 --retry-delay 3 --retry-all-errors \
+            -o /dev/null "$origin/"
+
+          curl -fsS --retry 5 --retry-delay 3 --retry-all-errors \
+            "$origin/api/health" | jq -e '.ok == true' > /dev/null
+
+          config=$(curl -fsS --retry 5 --retry-delay 3 --retry-all-errors "$origin/api/config")
+          echo "$config" | jq .
+
+          # Assert production matches the committed config rather than a hardcoded
+          # value, so this works both before and after Turnstile is switched on.
+          # /api/config reports turnstileRequired(env), which is
+          # REQUIRE_TURNSTILE === 'true' && !!TURNSTILE_SECRET — so one check catches
+          # both a reverted var and a secret that was never set. Both fail open in the
+          # Worker, which is exactly why they need asserting out here.
+          if grep -qE '^[[:space:]]*REQUIRE_TURNSTILE[[:space:]]*=[[:space:]]*"true"' wrangler.toml; then
+            want=true
+          else
+            want=false
+          fi
+
+          if ! echo "$config" | jq -e --argjson want "$want" \
+                 '.requireTurnstile == $want' > /dev/null; then
+            echo "::error::requireTurnstile is not $want in production. If it should be" \
+                 "true, either REQUIRE_TURNSTILE was reverted or TURNSTILE_SECRET was" \
+                 "never set. Roll back and fix before publishing is left unprotected."
+            exit 1
+          fi

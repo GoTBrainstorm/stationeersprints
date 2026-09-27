@@ -25,6 +25,8 @@ dist-ssr
 
 # Cloudflare
 .dev.vars
+# wrangler's --env-file also reads .env; keep it out of a public repo by default.
+.env*
 .wrangler/
 
 # Temporary feature files

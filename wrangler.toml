@@ -7,6 +7,13 @@ compatibility_date = "2026-09-01"
 # *.workers.dev alias would route around both.
 workers_dev = false
 
+# Version (preview) URLs default to following workers_dev, but pin it rather than
+# inherit a server-side default: a version URL is a public *.workers.dev host bound
+# to the production D1 and R2, and it routes around Turnstile and the Access rule on
+# /admin for the same reason the line above exists. The cost is that CI cannot
+# smoke-test an uploaded version before promoting it — see .github/workflows/.
+preview_urls = false
+
 # The built SPA. `vite build` must run before `wrangler deploy`; `npm run
 # deploy` chains them.
 [assets]
@@ -23,21 +30,26 @@ run_worker_first = ["/api/*", "/b/*", "/storage/*"]
 binding = "DB"
 database_name = "stationeersprints"
 # Replace with the id printed by `wrangler d1 create stationeersprints`.
-database_id = "REPLACE_ME"
+database_id = "ba4d299c-5c5a-4c6e-b110-938b0c5a5ddb"
 migrations_dir = "worker/migrations"
 
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "stationeersprints"
 
+# This block is the only source of truth for the Worker's vars. Every deploy and
+# every `versions upload` replaces the live vars wholesale with what is committed
+# here, so a value edited in the dashboard lasts exactly until the next release.
+# Change them in this file, not there. (Secrets are the opposite: a deploy never
+# touches them.)
 [vars]
 SITE_ORIGIN = "https://stationeersprints.com"
 # Bucket's custom domain. Previews and blueprint JSON are fetched from here
 # directly, so a 24-card gallery costs two Worker requests instead of twenty-six.
 R2_PUBLIC_ORIGIN = "https://cdn.stationeersprints.com"
 # Public site key; the matching secret is set with `wrangler secret put TURNSTILE_SECRET`.
-TURNSTILE_SITE_KEY = ""
-REQUIRE_TURNSTILE = "false"
+TURNSTILE_SITE_KEY = "0x4AAAAAAFFUMeNxku_E59NE"
+REQUIRE_TURNSTILE = "true"
 
 # Secrets — never in this file. See worker/README.md:
 #   wrangler secret put TURNSTILE_SECRET
@@ -49,3 +61,9 @@ REQUIRE_TURNSTILE = "false"
 # front of miniflare's bucket, so the Worker serves /storage/* itself.
 # Deliberately not an [env.dev] section — named environments do not inherit
 # [vars] or bindings, so one would have to restate every binding above.
+
+[[unsafe.bindings]]
+name = "PUBLISH_BURST"
+type = "ratelimit"
+namespace_id = "1"
+simple = { limit = 3, period = 60 }
