@@ -1,20 +1,23 @@
 # Stationeersprints
 
+Live version: [https://stationeersprints.com/](https://stationeersprints.com/)
+
 A web-based schematic editor for [Stationeers](https://store.steampowered.com/app/544550/Stationeers/) systems.
 Draw the devices of a system, how they're cabled, piped and chuted together, and how each
 one is configured (Logic Reader → Daylight Sensor → Horizontal, vent modes, IC10 code…).
 Add numbered notes and share the result as a link or JSON file.
 
-- **Device catalog from the game.** Ports, logic variables, modes and icons are extracted from your
-  Stationeers install (see [tools/extract/README.md](tools/extract/README.md)).
+- **Device catalog from the game.** Ports, logic variables, modes and icons are extracted from the
+  Stationeers game (see [tools/extract/README.md](tools/extract/README.md)).
 - **Logic links follow the configuration.** Set a Logic Reader's device and variable in the inspector
-  and the dashed logic arrow appears. The diagram and the config can't disagree.
-- **Sharing without a server.** The whole blueprint is compressed into the URL (`#bp=…`).
+  and the dashed logic arrow appears.
+- **Sharing.** The whole blueprint is compressed into the URL (`#bp=…`).
   Opening a link shows a read-only view with an "Edit a copy" button.
-- **A shopping list.** Every device on the canvas, plus the kits and materials the game says they're
-  built from, tallied up and ready to copy or download.
-- **Ten example blueprints**: solar tracking, backup generator, arc furnace line, furnace alloys,
-  room temperature, gas filtering, room pressure, airlock, greenhouse and water from ice.
+  Blueprints can also be shared via a tiny link, allowing for more complex prints to be shared.
+- **Gallery.** Basic functionality for "publishing" blueprints, allowing other to see them. This feature
+  is at the moment pretty basic and depends on the site administrator reviewing.
+- **Shopping list.** Every device on the canvas, plus the kits and materials the game says they're
+  built from, can be listed and exported to text.
 
 ## Development
 
@@ -56,9 +59,8 @@ network service, AGPL section 13 requires you to offer its users the correspondi
 so a public fork of the editor has to publish its changes.
 
 **This license covers the source code only.** It does not apply to `public/data/`, whose
-`catalog.json` and 521 icons are extracted from a Stationeers install and remain the property
+`catalog.json` and all icons are extracted from a Stationeers install and remain the property
 of RocketWerkz. They are committed so the app works without the game installed; they are not
-mine to license, and a redistribution that needs clean provenance should regenerate them with
-`npm run extract` instead.
+mine to license.
 
 Fan-made. Not affiliated with RocketWerkz. Device names, descriptions and icons belong to their owners.

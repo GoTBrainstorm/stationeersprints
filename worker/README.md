@@ -73,104 +73,41 @@ Against `npm run dev` + `npm run dev:api`:
 10. Clear `localStorage` (or use another browser), then **Mine → Have a management key?** with the
     link and the key from step 3 → the blueprint is manageable again. A wrong key answers 404.
 
-## Provisioning
+## Releasing
 
-Nothing below is done automatically. Run it once, in order.
+Merging to `main` runs [`.github/workflows/release.yml`](../.github/workflows/release.yml):
 
-### 1. Domain
+1. **`build`** runs the checks, builds, and `wrangler versions upload`s the result. Cloudflare
+   stores that exact artifact as a Worker *version* at **0% traffic**. Production is unchanged;
+   `npx wrangler versions list` shows it, the live deployment still points at the old one.
+2. **`promote`** waits on the `production` environment until someone clicks approve, then applies
+   D1 migrations, promotes *that same version id* to 100%, and verifies `/api/health` and
+   `/api/config` against the real domain.
 
-Register `stationeersprints.com` and add it to the Cloudflare account. Wait for the nameservers to
-come active.
+What goes live is byte-for-byte what was tested — promotion deploys a version id, it does not
+rebuild. To undo, run the **Rollback** workflow with an id from `npx wrangler versions list`.
 
-### 2. D1
+There is no staging and, with `preview_urls = false`, no preview URL — so nothing can be clicked
+through before approval. That is deliberate: a version URL would be a public `*.workers.dev` host
+bound to the production D1 and R2 that routes around both Turnstile and the Access rule on
+`/admin`. The post-promotion assertions plus one-command rollback are the trade. If that proves too
+thin, the next step is a canary (`versions deploy "$VID@10"`, check, then `@100`), not preview URLs.
 
-```sh
-npx wrangler d1 create stationeersprints
-```
+**Migrations must be safe for the *previous* version of the Worker.** CI applies them before the new
+version takes traffic, so the old code briefly serves against the new schema — and a rollback moves
+the code back but never the schema. Therefore: add columns only as nullable or `DEFAULT`-ed; never
+add a `NOT NULL` column without a default, since the insert at `db.ts:50` names every column
+explicitly and would start failing; and never drop or rename a column, index or table in the same
+release that stops using it — expand first, contract two releases later. Today's migrations are
+already safe, being nothing but `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
 
-Copy the printed `database_id` into `wrangler.toml` (it replaces `REPLACE_ME`). Then:
+**`npm run deploy` bypasses all of this.** No approval, no migrations, no verification. After the
+bootstrap in step 7 it is an emergency tool.
 
-```sh
-npm run db:migrate          # --remote
-```
-
-### 3. R2
-
-```sh
-npx wrangler r2 bucket create stationeersprints
-```
-
-In the dashboard, under **R2 → stationeersprints → Settings**:
-
-- **Custom domain**: `cdn.stationeersprints.com`. This is what makes the bucket public — do *not*
-  enable the `r2.dev` public URL, which is rate-limited and not meant for production.
-- **CORS**: allow `GET` from `https://stationeersprints.com`. The editor fetches blueprint JSON
-  from this origin with `fetch()`, which is a cross-origin request. Previews are `<img>` tags and
-  do not need it, but the JSON does.
-
-Having the bucket on its own hostname is the whole cost story: a gallery page of 24 cards costs
-**two** Worker invocations (the HTML and `/api/gallery`) instead of twenty-six, because every
-preview is served straight from R2.
-
-### 4. Turnstile
-
-Create a widget for `stationeersprints.com` (Managed mode). Put the **site key** in
-`wrangler.toml` under `[vars] TURNSTILE_SITE_KEY`, set `REQUIRE_TURNSTILE = "true"`, and the
-secret:
-
-```sh
-npx wrangler secret put TURNSTILE_SECRET
-```
-
-Leave `REQUIRE_TURNSTILE` false until the secret is set — `turnstileRequired()` needs both, and the
-Worker fails closed if verification is on and the API is unreachable.
-
-### 5. Secrets
-
-```sh
-npx wrangler secret put IP_PEPPER      # e.g. `openssl rand -hex 32`
-npx wrangler secret put ADMIN_TOKEN    # e.g. `openssl rand -hex 32`
-```
-
-`IP_PEPPER` must never change casually: rotating it resets every rate-limit bucket and orphans the
-`ip_hash` trail used to find an abuser's other uploads. `ADMIN_TOKEN` can be rotated freely.
-
-### 6. Rate-limit binding (optional)
-
-The burst layer. Add to `wrangler.toml` and redeploy:
-
-```toml
-[[unsafe.bindings]]
-name = "PUBLISH_BURST"
-type = "ratelimit"
-namespace_id = "1"
-simple = { limit = 3, period = 60 }
-```
-
-Without it, `checkBurst()` is a no-op and only the hourly D1 limit applies. The binding cannot
-express the hourly limit itself — its `period` accepts only 10 or 60 seconds, which is why
-`publish_events` exists.
-
-### 7. Deploy
-
-```sh
-npm run deploy      # vite build && wrangler deploy
-```
-
-Then in the dashboard, **Workers → stationeersprints → Domains & Routes**, add
-`stationeersprints.com` and `www.stationeersprints.com`. `workers_dev = false` is already set:
-Turnstile is bound to the real hostname, and a live `*.workers.dev` alias would route around it.
-
-### 8. Lock down /admin
-
-Cloudflare Access (Zero Trust → Applications) on `stationeersprints.com/admin`, restricted to your
-own email. The Worker checks `ADMIN_TOKEN` on the API regardless — Access is defence in depth, not
-the only gate, because it protects the *path* and the API lives at `/api/admin/*`.
-
-### 9. Abuse contact
-
-Put a real address in the site footer or a `/legal` page before the gallery opens. Publishing is
-anonymous, so a takedown request has nowhere else to go.
+**`wrangler secret put` also deploys.** It creates a new version and ships it immediately, outside
+the gate — though only when the live version is already the latest, so it cannot smuggle out a
+release you haven't approved. If one is pending, the command refuses; use `wrangler versions secret
+put` to change the secret without deploying. See step 8.
 
 ## Operational notes
 
