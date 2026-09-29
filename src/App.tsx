@@ -144,7 +144,6 @@ function Canvas() {
         snapGrid={[10, 10]}
         fitView
         minZoom={0.1}
-        proOptions={{ hideAttribution: true }}
         colorMode="dark"
       >
         <Background gap={20} />
