@@ -6,7 +6,8 @@
 #              migrations and promotes *that same version id* to 100%.
 #
 # Because promote deploys a version id rather than rebuilding, what goes live is
-# byte-for-byte what `build` tested.
+# byte-for-byte what `build` tested. Both jobs supersede their predecessors, so a
+# burst of pushes leaves exactly one release awaiting approval — the newest.
 name: Release
 
 on:
@@ -20,6 +21,12 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # A superseded commit's version is never going to be promoted, so stop paying for
+    # it. Cancelling mid-upload is safe: the worst case is an orphaned version sitting
+    # at 0% traffic, and a cancelled build skips its own promote via `needs`.
+    concurrency:
+      group: release-build
+      cancel-in-progress: true
     outputs:
       version_id: ${{ steps.upload.outputs.version_id }}
     steps:
@@ -93,12 +100,23 @@ jobs:
     environment:
       name: production
       url: https://stationeersprints.com
-    # On the job, not the workflow. At workflow level an unapproved release would also
-    # block *builds* for later commits, and GitHub keeps only one pending run per
-    # group — a third push would discard the second commit's version entirely.
+    # A job waiting on its approver holds the concurrency group as *in progress*, so
+    # cancel-in-progress is what supersedes it: push again and the older, unapproved
+    # release is cancelled outright. An approver is then only ever offered the newest
+    # commit, instead of a queue of stale ones to approve or decline one by one.
+    #
+    # Deliberately a second group rather than workflow-level concurrency. Here a stale
+    # promote survives until a newer build has *succeeded* and its promote starts; at
+    # workflow level the newer run would cancel it the moment its build began, so a
+    # push that breaks the tests on main would leave nothing promotable at all.
+    #
+    # The narrow cost: a push landing inside the ~2 minutes a promote is genuinely
+    # deploying cancels it mid-flight. That is recoverable by design — migrations are
+    # backward compatible and the superseding run redeploys — but read the Actions log
+    # rather than assuming a cancelled promote left production untouched.
     concurrency:
       group: release-production
-      cancel-in-progress: false
+      cancel-in-progress: true
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

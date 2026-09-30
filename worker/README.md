@@ -87,6 +87,16 @@ Merging to `main` runs [`.github/workflows/release.yml`](../.github/workflows/re
 What goes live is byte-for-byte what was tested — promotion deploys a version id, it does not
 rebuild. To undo, run the **Rollback** workflow with an id from `npx wrangler versions list`.
 
+**Pushing again supersedes an unapproved release.** Both jobs are `cancel-in-progress`, on separate
+concurrency groups, so a run of small commits doesn't hand you a queue of approvals to work through:
+a newer build cancels an older one still running, and a newer `promote` cancels an older one still
+waiting on its approver. You are only ever asked to approve the newest commit. Two consequences
+worth knowing. A push that lands while a promote is *actually deploying* cancels it mid-flight —
+recoverable, since migrations are backward compatible and the superseding run redeploys, but read
+the run's log rather than assuming production was left untouched. And cancelling a `promote` does
+not remove anything from Cloudflare: the superseded version stays uploaded at 0% traffic, so
+`npx wrangler versions list` keeps showing it and `wrangler secret put` keeps refusing (below).
+
 There is no staging and, with `preview_urls = false`, no preview URL — so nothing can be clicked
 through before approval. That is deliberate: a version URL would be a public `*.workers.dev` host
 bound to the production D1 and R2 that routes around both Turnstile and the Access rule on
