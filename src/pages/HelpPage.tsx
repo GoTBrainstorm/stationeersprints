@@ -55,11 +55,19 @@ export function HelpContent() {
           <strong>🔒 Zones</strong> button freezes them so they stop getting dragged by accident.
         </li>
         <li>
-          <strong>Delete</strong> removes the selection. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes,{' '}
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redoes. Typing in a field is one undo step, not one per
-          keystroke.
+          <strong>Delete</strong> removes the selection — the <kbd>Delete</kbd> key, or the button at the bottom of
+          the inspector. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redoes.
+          Typing in a field is one undo step, not one per keystroke.
         </li>
       </ul>
+
+      <h3>On a phone</h3>
+      <p>
+        This is a desktop tool and a small screen shows it. Reading a shared blueprint works: the diagram fills the
+        screen, you can pan and pinch-zoom it, and tapping a device opens its configuration. Drawing one is another
+        matter — the palette and inspector become panels you open from the toolbar, a single tap adds the device you
+        picked, and connecting two ports means hitting targets sized for a mouse. It is possible, not pleasant.
+      </p>
 
       <h3>Configuring a device</h3>
       <p>

@@ -162,6 +162,40 @@ document, gated on `useNodesInitialized()` — fitting before React Flow has mea
 computes a viewport from zero-sized boxes and lands in the top-left corner. It is deliberately
 outside `Snapshot`, so undo and redo don't move the viewport.
 
+## Mobile
+
+The editor is a desktop tool and the mobile layer doesn't pretend otherwise. What it buys is
+that someone who taps a shared link on a phone lands on a readable diagram — which is most of
+the mobile traffic there will ever be.
+
+Two media queries, for two different reasons. **Don't conflate them.**
+
+- `(max-width: 820px)` — layout. The palette (250px) and inspector (330px) are fixed-basis flex
+  items, so below roughly this width the `flex-basis: 0` canvas resolves to *zero* and the
+  diagram disappears entirely. Below the breakpoint both become absolutely positioned drawers
+  over a full-width canvas, toggled from the toolbar.
+- `(pointer: coarse)` — hit targets only, deliberately width-independent, so a touch laptop
+  gets 44px buttons without losing its three-column shell.
+
+`useIsNarrow()` in `src/media.ts` is the JS half (drawer open/closed is React state, so this
+can't be pure CSS). Its `useSyncExternalStore` snapshot **must stay a boolean primitive**, for
+exactly the reason `routes.ts` returns a bare pathname.
+
+**`.main` must keep `overflow: hidden` under the breakpoint.** A closed drawer is translated
+its own width past the edge, and a transform still contributes to scrollable overflow — without
+the clip, the closed inspector alone scrolls the whole document sideways. That horizontal
+scroll was the original symptom; it is easy to reintroduce.
+
+**Don't resize `.react-flow__handle.port` to make it tappable.** It's 11px with a per-side
+`transform` balancing act, and growing it moves the anchor the edges are drawn to. The coarse
+query grows a transparent `::before` instead, which changes no layout.
+
+Adding a device is HTML5 drag-and-drop, which **touch never fires**. `Palette` takes a `narrow`
+prop that turns a single tap into an add; it's gated because on a desktop a click that adds a
+device would be a regression. Deleting was likewise keyboard-only, hence `deleteSelection()` in
+the store and the button at the foot of the inspector — it cleans up edges orphaned by a removed
+node, which React Flow's own delete path does for us but a button has to do itself.
+
 ## Tests
 
 - `src/model/model.test.ts` — serialization round-trips, rejection of broken input, connection rules, logic-link derivation, shopping-list tallying.
@@ -212,6 +246,7 @@ src/
   App.tsx              canvas wiring, initial load (/b/:id > share link > autosave > first example), PNG export
   store.ts             zustand store, undo history, blueprint <-> graph conversion
   routes.ts            path router (no JSX, so it tests in the node pool)
+  media.ts             useIsNarrow() — the one breakpoint the drawer layout keys off
   exportPng.ts         canvas -> PNG, shared by the download button and publishing
   download.ts          blob download + filename slug
   model/

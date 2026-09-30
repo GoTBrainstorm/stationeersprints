@@ -7,7 +7,7 @@ export const DRAG_MIME = 'application/x-stationeersprints'
 
 export type PaletteItem = { kind: 'device'; prefab: string } | { kind: 'note' } | { kind: 'zone' }
 
-function DeviceEntry({ device, onAdd }: { device: CatalogDevice; onAdd: (item: PaletteItem) => void }) {
+function DeviceEntry({ device, onAdd, tapToAdd }: { device: CatalogDevice; onAdd: (item: PaletteItem) => void; tapToAdd: boolean }) {
   const item: PaletteItem = { kind: 'device', prefab: device.prefab }
   const icon = iconUrl(device)
   return (
@@ -18,8 +18,9 @@ function DeviceEntry({ device, onAdd }: { device: CatalogDevice; onAdd: (item: P
         e.dataTransfer.setData(DRAG_MIME, JSON.stringify(item))
         e.dataTransfer.effectAllowed = 'move'
       }}
+      onClick={tapToAdd ? () => onAdd(item) : undefined}
       onDoubleClick={() => onAdd(item)}
-      title={`${device.description}\n\n${device.prefab} — drag onto the canvas or double-click to add`}
+      title={`${device.description}\n\n${device.prefab} — ${tapToAdd ? 'tap to add' : 'drag onto the canvas or double-click to add'}`}
     >
       {icon ? <img src={icon} alt="" draggable={false} /> : <span className="palette-icon-placeholder" />}
       <span>{device.name}</span>
@@ -27,7 +28,7 @@ function DeviceEntry({ device, onAdd }: { device: CatalogDevice; onAdd: (item: P
   )
 }
 
-function ToolEntry({ item, label, onAdd }: { item: PaletteItem; label: string; onAdd: (item: PaletteItem) => void }) {
+function ToolEntry({ item, label, onAdd, tapToAdd }: { item: PaletteItem; label: string; onAdd: (item: PaletteItem) => void; tapToAdd: boolean }) {
   // Swatch colour comes from a class per tool; for the `@`-prefixed network nodes
   // that is the prefab without its `@`, which is not a valid class name.
   const swatch = item.kind === 'device' ? item.prefab.slice(1) : item.kind
@@ -39,6 +40,7 @@ function ToolEntry({ item, label, onAdd }: { item: PaletteItem; label: string; o
         e.dataTransfer.setData(DRAG_MIME, JSON.stringify(item))
         e.dataTransfer.effectAllowed = 'move'
       }}
+      onClick={tapToAdd ? () => onAdd(item) : undefined}
       onDoubleClick={() => onAdd(item)}
     >
       <span className={`palette-tool-swatch ${swatch}`} />
@@ -47,7 +49,13 @@ function ToolEntry({ item, label, onAdd }: { item: PaletteItem; label: string; o
   )
 }
 
-export default function Palette({ onAdd }: { onAdd: (item: PaletteItem) => void }) {
+/**
+ * `narrow` turns a single tap into an add. On a desktop that would be a
+ * regression — you click a row to read its tooltip — but touch never fires the
+ * HTML5 drag this panel is otherwise built around, and a double-tap is not
+ * something anyone discovers.
+ */
+export default function Palette({ onAdd, narrow, open }: { onAdd: (item: PaletteItem) => void; narrow: boolean; open: boolean }) {
   const catalog = useStore((s) => s.catalog)
   const readOnly = useStore((s) => s.readOnly)
   const [query, setQuery] = useState('')
@@ -63,7 +71,7 @@ export default function Palette({ onAdd }: { onAdd: (item: PaletteItem) => void 
   if (readOnly) return null
 
   return (
-    <aside className="palette">
+    <aside className={`palette drawer drawer-left${open ? ' drawer-open' : ''}`}>
       <input className="palette-search" placeholder="Search devices…" value={query} onChange={(e) => setQuery(e.target.value)} />
       <div className="palette-scroll">
         {!query && (
@@ -71,10 +79,10 @@ export default function Palette({ onAdd }: { onAdd: (item: PaletteItem) => void 
             <summary>Schematic</summary>
             <ul>
               {Object.values(BUILTINS).map((b) => (
-                <ToolEntry key={b.prefab} item={{ kind: 'device', prefab: b.prefab }} label={b.name} onAdd={onAdd} />
+                <ToolEntry key={b.prefab} item={{ kind: 'device', prefab: b.prefab }} label={b.name} onAdd={onAdd} tapToAdd={narrow} />
               ))}
-              <ToolEntry item={{ kind: 'note' }} label="Note / step" onAdd={onAdd} />
-              <ToolEntry item={{ kind: 'zone' }} label="Zone (room, outside…)" onAdd={onAdd} />
+              <ToolEntry item={{ kind: 'note' }} label="Note / step" onAdd={onAdd} tapToAdd={narrow} />
+              <ToolEntry item={{ kind: 'zone' }} label="Zone (room, outside…)" onAdd={onAdd} tapToAdd={narrow} />
             </ul>
           </details>
         )}
@@ -85,7 +93,7 @@ export default function Palette({ onAdd }: { onAdd: (item: PaletteItem) => void 
             </summary>
             <ul>
               {g.devices.map((d) => (
-                <DeviceEntry key={d.prefab} device={d} onAdd={onAdd} />
+                <DeviceEntry key={d.prefab} device={d} onAdd={onAdd} tapToAdd={narrow} />
               ))}
             </ul>
           </details>

@@ -34,6 +34,7 @@ import { validate } from './model/serialize'
 import { fromHash, hashFromLocation } from './model/shareLink'
 import { EXAMPLES, instantiate } from './examples'
 import { navigate, useRoute } from './routes'
+import { useIsNarrow } from './media'
 import GalleryPage from './pages/GalleryPage'
 import HelpPage from './pages/HelpPage'
 import NotFound from './pages/NotFound'
@@ -44,6 +45,18 @@ const AdminPage = lazy(() => import('./pages/AdminPage'))
 const nodeTypes = { device: DeviceNode, note: NoteNode, zone: ZoneNode }
 const AUTOSAVE_KEY = 'stationeersprints:autosave'
 
+// Telling someone their phone is the wrong tool is worth doing once, not every visit.
+const MOBILE_HINT_KEY = 'stationeersprints:mobilehint'
+
+function hintAlreadyDismissed(): boolean {
+  try {
+    return localStorage.getItem(MOBILE_HINT_KEY) === '1'
+  } catch {
+    // Storage blocked: show the hint rather than suppress it forever.
+    return false
+  }
+}
+
 function Canvas() {
   const nodes = useStore((s) => s.nodes)
   const edges = useStore((s) => s.edges)
@@ -51,6 +64,7 @@ function Canvas() {
   const readOnly = useStore((s) => s.readOnly)
   const zonesLocked = useStore(zonesFrozen)
   const docEpoch = useStore((s) => s.docEpoch)
+  const narrow = useIsNarrow()
   const { onNodesChange, onEdgesChange, onConnect, isValidConnection, addNode, checkpoint } = useStore.getState()
   const { screenToFlowPosition, fitView } = useReactFlow()
   const nodesInitialized = useNodesInitialized()
@@ -148,7 +162,11 @@ function Canvas() {
       >
         <Background gap={20} />
         <Controls showInteractive={false} />
-        <MiniMap pannable zoomable nodeStrokeWidth={3} />
+        {/*
+          The minimap is 200x150 — most of a phone's canvas — and it re-renders on
+          every node change. Drop it rather than hiding it with CSS.
+        */}
+        {!narrow && <MiniMap pannable zoomable nodeStrokeWidth={3} />}
       </ReactFlow>
     </div>
   )
@@ -200,7 +218,39 @@ function Editor({ publishedId }: { publishedId: string | null }) {
   const [error, setError] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const catalog = useStore((s) => s.catalog)
+  const readOnly = useStore((s) => s.readOnly)
   const { getNodes, screenToFlowPosition } = useReactFlow()
+
+  const narrow = useIsNarrow()
+  // Which sidebar is overlaying the canvas. Purely about the viewport, so it stays
+  // component state: nowhere near Snapshot, toBlueprint() or localStorage.
+  const [drawer, setDrawer] = useState<'palette' | 'inspector' | null>(null)
+  const [hintDismissed, setHintDismissed] = useState(hintAlreadyDismissed)
+  // A node the palette just placed is already selected, which would otherwise trip
+  // the auto-open below and hide the canvas the user is trying to see it land on.
+  const skipAutoOpen = useRef(false)
+
+  // On a phone the inspector is the only way to read a device's configuration, so
+  // selecting a node opens it and clearing the selection puts the canvas back.
+  // The selector returns an id, not a node, to keep the snapshot comparable.
+  const selectedId = useStore((s) => s.nodes.find((n) => n.selected)?.id ?? null)
+  useEffect(() => {
+    if (!narrow) return
+    if (skipAutoOpen.current) {
+      skipAutoOpen.current = false
+      return
+    }
+    setDrawer(selectedId ? 'inspector' : null)
+  }, [narrow, selectedId])
+
+  const dismissHint = () => {
+    setHintDismissed(true)
+    try {
+      localStorage.setItem(MOBILE_HINT_KEY, '1')
+    } catch {
+      // Storage blocked: the hint comes back next visit, which is survivable.
+    }
+  }
 
   const notify = useCallback((msg: string) => {
     setToast(msg)
@@ -380,6 +430,11 @@ function Editor({ publishedId }: { publishedId: string | null }) {
   const onPaletteAdd = (item: PaletteItem) => {
     const center = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
     addItem(item, center, useStore.getState().addNode)
+    // Get out of the way so the new node is actually visible where it landed.
+    if (narrow) {
+      skipAutoOpen.current = true
+      setDrawer(null)
+    }
   }
 
   if (error) {
@@ -420,11 +475,23 @@ function Editor({ publishedId }: { publishedId: string | null }) {
         onMyPublished={() => setShowMine(true)}
         onHelp={() => setShowHelp(true)}
         notify={notify}
+        narrow={narrow}
+        drawer={drawer}
+        onToggleDrawer={(which) => setDrawer((d) => (d === which ? null : which))}
       />
+      {narrow && !readOnly && !hintDismissed && (
+        <div className="mobile-hint">
+          <span>Built for a desktop — on a phone you can read and tinker, but drawing anything real will be a fight.</span>
+          <button className="icon-button" onClick={dismissHint} aria-label="Dismiss">
+            ×
+          </button>
+        </div>
+      )}
       <div className="main">
-        <Palette onAdd={onPaletteAdd} />
+        <Palette onAdd={onPaletteAdd} narrow={narrow} open={drawer === 'palette'} />
         <Canvas />
-        <Inspector />
+        <Inspector open={drawer === 'inspector'} onClose={() => setDrawer(null)} />
+        {narrow && drawer && <div className="drawer-backdrop" onClick={() => setDrawer(null)} />}
       </div>
       <footer className="footer">
         <span>

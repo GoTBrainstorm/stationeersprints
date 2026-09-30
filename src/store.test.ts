@@ -173,3 +173,78 @@ describe('device node round-trip through the store', () => {
     expect((useStore.getState().nodes[0].data as { dim?: boolean }).dim).toBeUndefined()
   })
 })
+
+describe('deleteSelection', () => {
+  // Two devices with a cable between them, so the orphaned-edge cleanup has
+  // something to clean up.
+  const wired = (): Blueprint => ({
+    ...emptyBlueprint(),
+    nodes: [
+      { id: 'a', type: 'device', x: 0, y: 0, prefab: '@CableNetwork', portSide: 'top' },
+      { id: 'b', type: 'device', x: 100, y: 0, prefab: '@CableNetwork', portSide: 'top' },
+    ],
+    edges: [{ id: 'e1', source: 'a', sourceHandle: 'Cable-None-0', target: 'b', targetHandle: 'Cable-None-0' }],
+  })
+
+  const select = (id: string) => useStore.getState().onNodesChange([{ id, type: 'select', selected: true }])
+
+  it('drops the edges of a deleted node, not just the node', () => {
+    start(wired())
+    select('a')
+    useStore.getState().deleteSelection()
+
+    const s = useStore.getState()
+    expect(s.nodes.map((n) => n.id)).toEqual(['b'])
+    // An edge pointing at a node that no longer exists would render as a stray line.
+    expect(s.edges).toHaveLength(0)
+  })
+
+  it('restores the node and its edges in a single undo step', () => {
+    start(wired())
+    select('a')
+    useStore.getState().deleteSelection()
+    expect(useStore.getState().past).toHaveLength(1)
+
+    useStore.getState().undo()
+    const s = useStore.getState()
+    expect(s.nodes).toHaveLength(2)
+    expect(s.edges).toHaveLength(1)
+  })
+
+  it('leaves unrelated nodes and edges alone', () => {
+    start(wired())
+    select('b')
+    useStore.getState().deleteSelection()
+    expect(useStore.getState().nodes.map((n) => n.id)).toEqual(['a'])
+  })
+
+  // Same reasoning as every other mutator: a published document is public and
+  // linkable, so hiding the button is not the enforcement.
+  it('is a no-op on a read-only document', () => {
+    useStore.getState().load(wired(), { readOnly: true })
+    useStore.setState({ past: [], future: [] })
+    useStore.setState({ nodes: useStore.getState().nodes.map((n) => ({ ...n, selected: true })) })
+
+    useStore.getState().deleteSelection()
+    const s = useStore.getState()
+    expect(s.nodes).toHaveLength(2)
+    expect(s.past).toHaveLength(0)
+  })
+
+  it('spends no undo step when nothing is selected', () => {
+    start(wired())
+    useStore.getState().deleteSelection()
+    expect(useStore.getState().past).toHaveLength(0)
+    expect(useStore.getState().nodes).toHaveLength(2)
+  })
+
+  // A frozen zone isn't selectable, but it can still carry a `selected` flag set
+  // before it was frozen — deleting it would be a click the user never made.
+  it('skips frozen zones', () => {
+    start(withZone('z1'))
+    select('z1')
+    useStore.setState({ zonesLocked: true })
+    useStore.getState().deleteSelection()
+    expect(useStore.getState().nodes).toHaveLength(1)
+  })
+})

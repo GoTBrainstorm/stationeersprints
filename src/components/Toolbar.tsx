@@ -16,6 +16,9 @@ export default function Toolbar({
   onMyPublished,
   onHelp,
   notify,
+  narrow,
+  drawer,
+  onToggleDrawer,
 }: {
   onExamples: () => void
   onExportPng: () => void
@@ -26,6 +29,9 @@ export default function Toolbar({
   onMyPublished: () => void
   onHelp: () => void
   notify: (msg: string) => void
+  narrow: boolean
+  drawer: 'palette' | 'inspector' | null
+  onToggleDrawer: (which: 'palette' | 'inspector') => void
 }) {
   const title = useStore((s) => s.meta.title)
   const readOnly = useStore((s) => s.readOnly)
@@ -73,10 +79,26 @@ export default function Toolbar({
       <div className="toolbar-title" title={title}>
         {title}
       </div>
+      {/*
+        Pinned outside .toolbar-group, which scrolls horizontally on a narrow
+        screen — the two ways to reach a sidebar must not be able to scroll away.
+      */}
+      {narrow && (
+        <div className="toolbar-drawers">
+          {!readOnly && (
+            <button className={drawer === 'palette' ? 'active' : undefined} aria-pressed={drawer === 'palette'} onClick={() => onToggleDrawer('palette')}>
+              + Add
+            </button>
+          )}
+          <button className={drawer === 'inspector' ? 'active' : undefined} aria-pressed={drawer === 'inspector'} onClick={() => onToggleDrawer('inspector')}>
+            Info
+          </button>
+        </div>
+      )}
       {readOnly ? (
         <div className="toolbar-group">
           <span className="badge">
-            {source.kind === 'published' ? 'Published blueprint (read-only)' : 'Shared blueprint (read-only)'}
+            {narrow ? 'Read-only' : source.kind === 'published' ? 'Published blueprint (read-only)' : 'Shared blueprint (read-only)'}
           </span>
           <button className="primary" onClick={onEditCopy}>
             Edit a copy

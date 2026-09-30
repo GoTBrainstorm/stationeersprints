@@ -387,7 +387,7 @@ function BlueprintInspector() {
         <h2>{meta.title}</h2>
         {meta.author && <p className="muted">by {meta.author}</p>}
         <p className="description pre">{meta.description}</p>
-        <p className="muted">Click a device to see how it is configured.</p>
+        <p className="muted">Select a device to see how it is configured.</p>
       </>
     )
   }
@@ -423,12 +423,17 @@ function BlueprintInspector() {
   )
 }
 
-export default function Inspector() {
+export default function Inspector({ open, onClose }: { open: boolean; onClose: () => void }) {
   const selected = useStore(useShallow((s) => s.nodes.filter((n) => n.selected && !(zonesFrozen(s) && n.type === 'zone'))))
   const readOnly = useStore((s) => s.readOnly)
+  const deleteSelection = useStore((s) => s.deleteSelection)
   const node = selected.length === 1 ? selected[0] : null
   return (
-    <aside className="inspector">
+    <aside className={`inspector drawer drawer-right${open ? ' drawer-open' : ''}`}>
+      {/* Only ever visible in the drawer layout; the desktop sidebar can't be closed. */}
+      <button className="icon-button drawer-close" onClick={onClose} aria-label="Close panel">
+        ×
+      </button>
       <fieldset disabled={readOnly}>
         {node?.type === 'device' ? (
           <DeviceInspector node={node} />
@@ -438,6 +443,16 @@ export default function Inspector() {
           <ZoneInspector node={node} />
         ) : (
           <BlueprintInspector />
+        )}
+        {/*
+          Delete is otherwise bound to a hardware key with no on-screen equivalent.
+          Inside the fieldset so a read-only document can't fire it, and gated on
+          `readOnly` as well: a reader can't delete, so offering the button is noise.
+        */}
+        {!readOnly && selected.length > 0 && (
+          <section className="inspector-actions">
+            <button onClick={deleteSelection}>Delete {selected.length > 1 ? `${selected.length} selected` : 'selected'}</button>
+          </section>
         )}
       </fieldset>
     </aside>

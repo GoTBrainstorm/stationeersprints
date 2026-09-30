@@ -83,6 +83,7 @@ interface State extends Snapshot {
   isValidConnection(c: Connection | AppEdge): boolean
   addNode(node: AppNode): void
   updateData(id: string, patch: Partial<DeviceData> | Partial<NoteData> | Partial<ZoneData>): void
+  deleteSelection(): void
   setMeta(patch: Partial<Meta>): void
   load(bp: Blueprint, opts?: { readOnly?: boolean; source?: DocSource }): void
   setReadOnly(v: boolean): void
@@ -335,6 +336,26 @@ export const useStore = create<State>((set, get) => ({
     if (get().readOnly) return
     get().checkpoint('meta')
     set({ meta: { ...get().meta, ...patch } })
+  },
+
+  /**
+   * Delete the current selection. Pressing Delete goes through React Flow, which
+   * drops the edges of a removed node for us; a button has to do that cleanup
+   * itself or the graph keeps edges pointing at nodes that no longer exist.
+   *
+   * Frozen zones are skipped to match what the inspector considers selected —
+   * they can still carry a stale `selected` flag from before they were frozen.
+   */
+  deleteSelection() {
+    const s = get()
+    if (s.readOnly) return
+    const frozen = zonesFrozen(s)
+    const doomed = new Set(s.nodes.flatMap((n) => (n.selected && !(frozen && n.type === 'zone') ? [n.id] : [])))
+    const edges = s.edges.filter((e) => !e.selected && !doomed.has(e.source) && !doomed.has(e.target))
+    // Nothing selected: don't spend an undo step on a no-op.
+    if (!doomed.size && edges.length === s.edges.length) return
+    get().checkpoint()
+    set({ nodes: s.nodes.filter((n) => !doomed.has(n.id)), edges })
   },
 
   load(bp, opts) {
