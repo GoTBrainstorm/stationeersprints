@@ -7,6 +7,15 @@ export interface Overrides {
   categories: { name: string; match: string[] }[]
   /** Prefabs to leave out of the catalog. */
   hidden: string[]
+  /**
+   * Connections for structures the game's own data cannot describe, which is two distinct cases:
+   * devices with an empty `ConnectionList` (pipe radiators, pipe meters, cable fuses mount onto an
+   * existing pipe or cable and inherit its network), and passive structures with no `Device` block
+   * at all (vents, in-line tanks — the game reserves `Device` for things with logic or power).
+   * An entry here also force-includes the prefab, so the second case reaches the catalog.
+   * Replaces the extracted ports wholesale; only use it on structures that have none.
+   */
+  ports?: Record<string, { network: string; role: string }[]>
 }
 
 export interface BuildInput {
@@ -73,6 +82,15 @@ export function buildPorts(connections: RawPrefab['connections']): CatalogPort[]
   })
 }
 
+/**
+ * Extracted connections always win, so a game update that gives one of these devices real ports
+ * silently supersedes the override instead of being masked by it. `extract.ts` reports the leftovers.
+ */
+export function resolvePorts(p: RawPrefab, overrides: Overrides): CatalogPort[] {
+  if (p.connections.length > 0) return buildPorts(p.connections)
+  return buildPorts(overrides.ports?.[p.prefab] ?? [])
+}
+
 export function categorize(prefab: string, overrides: Overrides): string {
   for (const c of overrides.categories) {
     if (c.match.some((m) => prefab.includes(m))) return c.name
@@ -99,8 +117,13 @@ function mapAccess(rec: Record<string, RawAccess>): Record<string, Access> {
 }
 
 export function isSchematicDevice(p: RawPrefab, overrides: Overrides): boolean {
-  if (!p.isDevice || !p.prefab.startsWith('Structure')) return false
+  if (!p.prefab.startsWith('Structure')) return false
   if (overrides.hidden.includes(p.prefab)) return false
+  // Declaring ports for a prefab is an explicit statement that it belongs on a schematic, which is
+  // how passive structures get in: the game only gives a `Device` to things with logic or power, so
+  // vents, in-line tanks and pylon terminals would otherwise be invisible to the editor.
+  if (overrides.ports?.[p.prefab]) return true
+  if (!p.isDevice) return false
   return p.connections.length > 0 || Object.keys(p.logic).length > 0
 }
 
@@ -126,7 +149,7 @@ export function buildCatalog(input: BuildInput): Catalog {
       description: stripMarkup(desc, nameOf),
       category: categorize(p.prefab, overrides),
       icon: input.hasIcon(p.prefab) ? `data/icons/${p.prefab}.webp` : undefined,
-      ports: buildPorts(p.connections),
+      ports: resolvePorts(p, overrides),
       logic: mapAccess(p.logic),
       slotLogic,
       slots: p.slots,

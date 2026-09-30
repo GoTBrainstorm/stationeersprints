@@ -78,4 +78,17 @@ const noBuild = Object.values(catalog.devices).filter((d) => !d.build).length
 console.log(`Build items: ${Object.keys(catalog.items).length}${noBuild ? `, devices with no known build cost: ${noBuild}` : ''}`)
 console.log(`Recipes: ${Object.entries(catalog.recipes).map(([m, r]) => `${nameOf(m)} ${r.length}`).join(', ')}`)
 
+// Guards the hand-written port table in overrides.json against a game update moving under it.
+// `ConnectionInsert` is Stationpedia's display copy of the connection list: it names no networks, so
+// it cannot generate the ports, but its length says how many the structure really has. A count of 0
+// means the port is deliberately synthetic — pipe-mounted devices join a network without owning an
+// endpoint — so only a structure the game does count is worth disagreeing with.
+const byPrefab = new Map(prefabs.map((p) => [p.prefab, p]))
+for (const [prefab, ports] of Object.entries(overrides.ports ?? {})) {
+  const p = byPrefab.get(prefab)
+  if (!p) console.warn(`! Port override for unknown prefab: ${prefab}`)
+  else if (p.connections.length > 0) console.warn(`! Stale port override (${prefab} now reports its own connections)`)
+  else if (p.connectionCount > 0 && p.connectionCount !== ports.length) console.warn(`! Port override for ${prefab} declares ${ports.length}, game says ${p.connectionCount}`)
+}
+
 console.log(`\nWrote ${join(outDir, 'catalog.json')}`)

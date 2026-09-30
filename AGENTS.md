@@ -74,7 +74,31 @@ invalidates the edges of every saved blueprint. The `label` field is the part th
 
 **`public/data/` is generated output.** Never hand-edit `catalog.json` or the icons. It's committed
 so the app works without a game install, but it's rebuilt wholesale by `npm run extract`. To change
-categorization or hide a device, edit `tools/extract/overrides.json`.
+categorization, hide a device, or give a structure ports it has none of, edit
+`tools/extract/overrides.json`. Category `match` entries are substrings and **first match wins**, so
+order matters: `Logistics` sits above `Atmospherics` precisely because `Chute` must beat `Valve`.
+
+> **`Device` in the game data means "has logic or power", not "belongs on a schematic".** Two
+> classes of structure fall through that gap, and `overrides.ports` in `tools/extract/overrides.json`
+> is the answer to both. *Mounted* devices — pipe radiators, pipe meters, the passive liquid drain,
+> the cable fuses — have a `Device` but an empty `ConnectionList`, because they attach to an existing
+> pipe or cable and inherit its network; they reached the catalog unwireable. *Passive* structures —
+> passive vents, in-line tanks, the hydroponics tray, the pylon terminus — have no `Device` at all
+> and so never reached the catalog. A `ports` entry force-includes the prefab, which is what admits
+> the second class; such devices carry no logic, slots or modes, just ports and a build cost.
+>
+> Two guards keep the hand-written table honest, both in `tools/extract/`. `resolvePorts()`
+> (`build.ts`) lets real extracted connections win over the override, so a game update that fixes the
+> data upstream supersedes it rather than being masked. And `extract.ts` checks each entry against
+> `RawPrefab.connectionCount` — Stationpedia's `ConnectionInsert` names no networks, so it cannot
+> generate ports, but its length says how many the structure really has. A count of 0 means the port
+> is deliberately synthetic (the mounted case) and is not warned about.
+>
+> **Don't add ports to something the game gives zero connections and no mounting story.** The wall
+> vent (`StructureWallVent`) mixes two rooms' atmospheres with no pipe, and `StructurePowerPylon` is
+> joined by stringing cable between nodes; both are correctly absent. Pipe, cable and chute
+> *segments* are excluded for a different reason — a run is drawn as `@PipeNetwork`/`@CableNetwork`,
+> not as a chain of parts. The ~23 devices still portless (chairs, lockers, signs) are legitimately so.
 
 **Logic links are derived, never stored.** `deriveLogicLinks()` in `src/model/settings.ts` computes
 the dashed arrows from device settings on every render (`App.tsx:53`). They're deliberately inert on

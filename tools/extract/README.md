@@ -13,7 +13,7 @@ Stationeers install. Run it again after every game update and commit the result.
 | `StreamingAssets/Language/english.xml` | Current display names and descriptions | no |
 | `StreamingAssets/Data/{furnace,advancedfurnace,arcfurnace}.xml` | Smelting recipes with temperature/pressure windows | no |
 | `StreamingAssets/version.ini` | Game version stamped into the catalog | no |
-| `tools/extract/overrides.json` | Palette categories, hidden prefabs | — |
+| `tools/extract/overrides.json` | Palette categories, hidden prefabs, synthetic ports | — |
 
 The mod export is required: without `Stationpedia.json` and `Enums.json` the extractor
 stops and points you at the setup below. Everything in `public/data/` is committed, so

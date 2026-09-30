@@ -13,6 +13,12 @@ export interface RawPrefab {
   description: string
   isDevice: boolean
   connections: { network: string; role: string }[]
+  /**
+   * How many connections Stationpedia's display data claims. Unlike `connections` this survives a
+   * null `Device`, so it is the only evidence of how many ports a passive structure has — but it
+   * names no networks, so it can validate an `overrides.ports` entry without replacing it.
+   */
+  connectionCount: number
   logic: Record<string, RawAccess>
   slotLogic: Record<string, Record<string, RawAccess>>
   slots: { name: string; type: string }[]
@@ -72,6 +78,7 @@ export function readStationpediaExport(dir: string): RawPrefab[] {
         description: p.Description ?? '',
         isDevice: p.Device != null,
         connections: (p.Device?.ConnectionList ?? []).map(([network, role]: [string, string]) => ({ network, role })),
+        connectionCount: (p.ConnectionInsert ?? []).length,
         logic: p.LogicInfo?.LogicTypes ?? {},
         slotLogic: p.LogicInfo?.LogicSlotTypes ?? {},
         slots: (p.Slots ?? []).map((s: any) => ({ name: s.SlotName, type: s.SlotClass })),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildCatalog, buildMaterials, buildPorts, stripMarkup, type Overrides } from './build.ts'
+import { buildCatalog, buildMaterials, buildPorts, isSchematicDevice, resolvePorts, stripMarkup, type Overrides } from './build.ts'
 import type { RawPrefab } from './sources.ts'
 
 const overrides: Overrides = {
@@ -11,7 +11,7 @@ const overrides: Overrides = {
 }
 
 function raw(p: Partial<RawPrefab> & { prefab: string }): RawPrefab {
-  return { hash: 1, name: p.prefab, description: '', isDevice: true, connections: [], logic: {}, slotLogic: {}, slots: [], modes: {}, buildStates: [], ...p }
+  return { hash: 1, name: p.prefab, description: '', isDevice: true, connections: [], connectionCount: 0, logic: {}, slotLogic: {}, slots: [], modes: {}, buildStates: [], ...p }
 }
 
 describe('buildPorts', () => {
@@ -27,6 +27,48 @@ describe('buildPorts', () => {
     expect(ports.map((p) => p.id)).toEqual(['Pipe-Input-0', 'Pipe-Output-0', 'Pipe-Waste-0', 'Data-None-0', 'Data-None-1', 'LandingPad-None-0'])
     expect(ports.map((p) => p.label)).toEqual(['Pipe in', 'Pipe out', 'Pipe waste', 'Data 1', 'Data 2', 'LandingPad'])
     expect(ports[5].kind).toBe('Other')
+  })
+})
+
+describe('resolvePorts', () => {
+  const withOverride: Overrides = { ...overrides, ports: { StructurePipeRadiator: [{ network: 'Pipe', role: 'None' }] } }
+
+  it('gives pipe-mounted devices the port the game does not report', () => {
+    const ports = resolvePorts(raw({ prefab: 'StructurePipeRadiator', connections: [] }), withOverride)
+    expect(ports).toEqual([{ id: 'Pipe-None-0', kind: 'Pipe', network: 'Pipe', role: 'None', label: 'Pipe' }])
+  })
+
+  it('prefers real connections, so a fixed game version supersedes the override', () => {
+    const fixed = raw({ prefab: 'StructurePipeRadiator', connections: [{ network: 'Pipe', role: 'Input' }] })
+    expect(resolvePorts(fixed, withOverride).map((p) => p.id)).toEqual(['Pipe-Input-0'])
+  })
+
+  it('leaves unlisted portless devices alone', () => {
+    expect(resolvePorts(raw({ prefab: 'StructureChair', connections: [] }), withOverride)).toEqual([])
+    expect(resolvePorts(raw({ prefab: 'StructurePipeRadiator', connections: [] }), overrides)).toEqual([])
+  })
+})
+
+describe('isSchematicDevice', () => {
+  it('admits a passive structure that a port override names', () => {
+    // A passive vent has no `Device` block at all, so it has no logic either — the override is the
+    // only thing keeping it in the catalog.
+    const vent = raw({ prefab: 'StructurePassiveVent', isDevice: false, logic: {}, connectionCount: 1 })
+    expect(isSchematicDevice(vent, overrides)).toBe(false)
+    expect(isSchematicDevice(vent, { ...overrides, ports: { StructurePassiveVent: [{ network: 'Pipe', role: 'None' }] } })).toBe(true)
+  })
+
+  it('still excludes passive structures and keeps hidden winning over an override', () => {
+    expect(isSchematicDevice(raw({ prefab: 'StructurePipeStraight', isDevice: false }), overrides)).toBe(false)
+    expect(isSchematicDevice(raw({ prefab: 'ItemTablet', isDevice: false }), { ...overrides, ports: { ItemTablet: [{ network: 'Data', role: 'None' }] } })).toBe(false)
+    const hidden = { ...overrides, ports: { StructureHiddenThing: [{ network: 'Power', role: 'None' }] } }
+    expect(isSchematicDevice(raw({ prefab: 'StructureHiddenThing', isDevice: false }), hidden)).toBe(false)
+  })
+
+  it('keeps admitting devices on their own connections or logic', () => {
+    expect(isSchematicDevice(raw({ prefab: 'StructureX', connections: [{ network: 'Pipe', role: 'Input' }] }), overrides)).toBe(true)
+    expect(isSchematicDevice(raw({ prefab: 'StructureY', logic: { On: 'ReadWrite' } }), overrides)).toBe(true)
+    expect(isSchematicDevice(raw({ prefab: 'StructureZ' }), overrides)).toBe(false)
   })
 })
 

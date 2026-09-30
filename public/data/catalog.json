@@ -1,15 +1,15 @@
 {
   "schema": 1,
   "gameVersion": "0.2.6428.27798",
-  "extractedAt": "2026-09-27T11:55:27.802Z",
+  "extractedAt": "2026-09-30T21:06:19.965Z",
   "categories": [
     "Logic",
     "Sensors",
     "Power",
     "Liquids",
+    "Logistics",
     "Atmospherics",
     "Manufacturing",
-    "Logistics",
     "Agriculture",
     "Doors & Airlocks",
     "Lighting",
@@ -4298,7 +4298,15 @@
       "description": "",
       "category": "Power",
       "icon": "data/icons/StructureCableFuse100k.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Power-None-0",
+          "kind": "Power",
+          "network": "Power",
+          "role": "None",
+          "label": "Power"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -4321,7 +4329,15 @@
       "description": "",
       "category": "Power",
       "icon": "data/icons/StructureCableFuse1k.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Power-None-0",
+          "kind": "Power",
+          "network": "Power",
+          "role": "None",
+          "label": "Power"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -4344,7 +4360,15 @@
       "description": "",
       "category": "Power",
       "icon": "data/icons/StructureCableFuse500k.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Power-None-0",
+          "kind": "Power",
+          "network": "Power",
+          "role": "None",
+          "label": "Power"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -4367,7 +4391,15 @@
       "description": "",
       "category": "Power",
       "icon": "data/icons/StructureCableFuse50k.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Power-None-0",
+          "kind": "Power",
+          "network": "Power",
+          "role": "None",
+          "label": "Power"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -4390,7 +4422,15 @@
       "description": "",
       "category": "Power",
       "icon": "data/icons/StructureCableFuse5k.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Power-None-0",
+          "kind": "Power",
+          "network": "Power",
+          "role": "None",
+          "label": "Power"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -8103,7 +8143,7 @@
       "hash": 648608238,
       "name": "Chute Digital Valve Left",
       "description": "The Digital Chute Valve will stop the flow of materials when set to closed and when set to open, will act like a straight chute. The valve will automatically close after a certain number of items have passed through. This threshold can be set using the dial.",
-      "category": "Atmospherics",
+      "category": "Logistics",
       "icon": "data/icons/StructureChuteDigitalValveLeft.webp",
       "ports": [
         {
@@ -8174,7 +8214,7 @@
       "hash": -1337091041,
       "name": "Chute Digital Valve Right",
       "description": "The Digital Chute Valve will stop the flow of materials when set to closed and when set to open, will act like a straight chute. The valve will automatically close after a certain number of items have passed through. This threshold can be set using the dial.",
-      "category": "Atmospherics",
+      "category": "Logistics",
       "icon": "data/icons/StructureChuteDigitalValveRight.webp",
       "ports": [
         {
@@ -8303,6 +8343,55 @@
         }
       ]
     },
+    "StructureChuteFlipFlopSplitter": {
+      "prefab": "StructureChuteFlipFlopSplitter",
+      "hash": -1446854725,
+      "name": "Chute Flip Flop Splitter",
+      "description": "A chute that toggles between two outputs",
+      "category": "Logistics",
+      "icon": "data/icons/StructureChuteFlipFlopSplitter.webp",
+      "ports": [
+        {
+          "id": "Chute-Input-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Input",
+          "label": "Chute in"
+        },
+        {
+          "id": "Chute-Output-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Output",
+          "label": "Chute out"
+        },
+        {
+          "id": "Chute-Output2-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Output2",
+          "label": "Chute out 2"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [
+        {
+          "name": "Transport Slot",
+          "type": "None"
+        }
+      ],
+      "modes": {
+        "0": "Mode0",
+        "1": "Mode1"
+      },
+      "build": [
+        {
+          "item": "ItemKitChute",
+          "quantity": 2
+        }
+      ]
+    },
     "StructureChuteInlet": {
       "prefab": "StructureChuteInlet",
       "hash": -1469588766,
@@ -8421,6 +8510,52 @@
         {
           "item": "ItemKitChute",
           "quantity": 2
+        }
+      ]
+    },
+    "StructureChuteOverflow": {
+      "prefab": "StructureChuteOverflow",
+      "hash": 225377225,
+      "name": "Chute Overflow",
+      "description": "The overflow chute will direct materials to its overflow port when the thing connected to its default port is already occupied.",
+      "category": "Logistics",
+      "icon": "data/icons/StructureChuteOverflow.webp",
+      "ports": [
+        {
+          "id": "Chute-Input-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Input",
+          "label": "Chute in"
+        },
+        {
+          "id": "Chute-Output-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Output",
+          "label": "Chute out"
+        },
+        {
+          "id": "Chute-Output2-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Output2",
+          "label": "Chute out 2"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [
+        {
+          "name": "Transport Slot",
+          "type": "None"
+        }
+      ],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitChute",
+          "quantity": 1
         }
       ]
     },
@@ -8588,6 +8723,45 @@
       "build": [
         {
           "item": "ItemKitChuteUmbilical",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureChuteValve": {
+      "prefab": "StructureChuteValve",
+      "hash": 434875271,
+      "name": "Chute Valve",
+      "description": "The Chute Valve will stop the flow of materials when set to closed and when set to open, will act like a straight chute.",
+      "category": "Logistics",
+      "icon": "data/icons/StructureChuteValve.webp",
+      "ports": [
+        {
+          "id": "Chute-Input-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Input",
+          "label": "Chute in"
+        },
+        {
+          "id": "Chute-Output-0",
+          "kind": "Chute",
+          "network": "Chute",
+          "role": "Output",
+          "label": "Chute out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [
+        {
+          "name": "Transport Slot",
+          "type": "None"
+        }
+      ],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitChute",
           "quantity": 1
         }
       ]
@@ -10758,6 +10932,33 @@
         }
       ]
     },
+    "StructureCrewModulePassiveVent": {
+      "prefab": "StructureCrewModulePassiveVent",
+      "hash": 1393516022,
+      "name": "Crew Module Passive Vent",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureCrewModulePassiveVent.webp",
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemPassiveVent",
+          "quantity": 1
+        }
+      ]
+    },
     "StructureCrewModuleScreen": {
       "prefab": "StructureCrewModuleScreen",
       "hash": 1880475854,
@@ -12741,6 +12942,33 @@
       "build": [
         {
           "item": "ItemKitChairs",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureFloorDrain": {
+      "prefab": "StructureFloorDrain",
+      "hash": 1048813293,
+      "name": "Passive Liquid Inlet",
+      "description": "A passive liquid floor inlet that quickly removes liquids in one direction from the world into the connected pipe network and equalises gasses with the world atmosphere. \n        It will remove liquids from grids at the same level up to 6 Grids away.",
+      "category": "Liquids",
+      "icon": "data/icons/StructureFloorDrain.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-None-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemLiquidDrain",
           "quantity": 1
         }
       ]
@@ -14734,6 +14962,49 @@
         }
       ]
     },
+    "StructureHydroponicsTray": {
+      "prefab": "StructureHydroponicsTray",
+      "hash": 1464854517,
+      "name": "Hydroponics Tray",
+      "description": "The Agrizero hydroponics tray is the ideal vessel for growing a range of plantlife. It must be supplied with water using a pipe network, and sufficient light to generate photosynthesis. \nIt can be automated using the Harvie.",
+      "category": "Agriculture",
+      "icon": "data/icons/StructureHydroponicsTray.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-None-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid 1"
+        },
+        {
+          "id": "PipeLiquid-None-1",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid 2"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [
+        {
+          "name": "Plant",
+          "type": "Plant"
+        },
+        {
+          "name": "Fertiliser",
+          "type": "Plant"
+        }
+      ],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemHydroponicTray",
+          "quantity": 1
+        }
+      ]
+    },
     "StructureHydroponicsTrayData": {
       "prefab": "StructureHydroponicsTrayData",
       "hash": -1841632400,
@@ -15047,6 +15318,478 @@
       "build": [
         {
           "item": "ItemIgniter",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureInLineTankGas1x1": {
+      "prefab": "StructureInLineTankGas1x1",
+      "hash": -1693382705,
+      "name": "In-Line Tank Small Gas",
+      "description": "A small expansion tank that increases the volume of a pipe network.",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInLineTankGas1x1.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPipeUtility",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureInLineTankGas1x2": {
+      "prefab": "StructureInLineTankGas1x2",
+      "hash": 35149429,
+      "name": "In-Line Tank Gas",
+      "description": "A small expansion tank that increases the volume of a pipe network.",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInLineTankGas1x2.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPipeUtility",
+          "quantity": 2
+        }
+      ]
+    },
+    "StructureInLineTankGas1x3": {
+      "prefab": "StructureInLineTankGas1x3",
+      "hash": 1964992227,
+      "name": "In-Line Tank Gas 1x3",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInLineTankGas1x3.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPipeUtility",
+          "quantity": 3
+        }
+      ]
+    },
+    "StructureInLineTankLiquid1x1": {
+      "prefab": "StructureInLineTankLiquid1x1",
+      "hash": 543645499,
+      "name": "In-Line Tank Small Liquid",
+      "description": "A small expansion tank that increases the volume of a pipe network.",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInLineTankLiquid1x1.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        },
+        {
+          "id": "PipeLiquid-Output-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Output",
+          "label": "Liquid out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPipeUtilityLiquid",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureInLineTankLiquid1x2": {
+      "prefab": "StructureInLineTankLiquid1x2",
+      "hash": -1183969663,
+      "name": "In-Line Tank Liquid",
+      "description": "A small expansion tank that increases the volume of a pipe network.",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInLineTankLiquid1x2.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        },
+        {
+          "id": "PipeLiquid-Output-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Output",
+          "label": "Liquid out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPipeUtilityLiquid",
+          "quantity": 2
+        }
+      ]
+    },
+    "StructureInLineTankLiquid1x3": {
+      "prefab": "StructureInLineTankLiquid1x3",
+      "hash": -831963625,
+      "name": "In-Line Tank Liquid 1x3",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInLineTankLiquid1x3.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        },
+        {
+          "id": "PipeLiquid-Output-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Output",
+          "label": "Liquid out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPipeUtilityLiquid",
+          "quantity": 3
+        }
+      ]
+    },
+    "StructureInsulatedInLineTankGas1x1": {
+      "prefab": "StructureInsulatedInLineTankGas1x1",
+      "hash": 1818267386,
+      "name": "In-Line Tank Small Gas (Insulated)",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInsulatedInLineTankGas1x1.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitInsulatedPipeUtility",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureInsulatedInLineTankGas1x2": {
+      "prefab": "StructureInsulatedInLineTankGas1x2",
+      "hash": -177610944,
+      "name": "In-Line Tank Gas (Insulated)",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInsulatedInLineTankGas1x2.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitInsulatedPipeUtility",
+          "quantity": 2
+        }
+      ]
+    },
+    "StructureInsulatedInLineTankGas1x3": {
+      "prefab": "StructureInsulatedInLineTankGas1x3",
+      "hash": -2106658858,
+      "name": "In-Line Tank Gas 1x3 (Insulated)",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInsulatedInLineTankGas1x3.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitInsulatedPipeUtility",
+          "quantity": 3
+        }
+      ]
+    },
+    "StructureInsulatedInLineTankLiquid1x1": {
+      "prefab": "StructureInsulatedInLineTankLiquid1x1",
+      "hash": -813426145,
+      "name": "In-Line Liquid (Insulated)",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInsulatedInLineTankLiquid1x1.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        },
+        {
+          "id": "PipeLiquid-Output-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Output",
+          "label": "Liquid out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitInsulatedPipeUtilityLiquid",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureInsulatedInLineTankLiquid1x2": {
+      "prefab": "StructureInsulatedInLineTankLiquid1x2",
+      "hash": 1452100517,
+      "name": "In-Line Tank Liquid (Insulated)",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInsulatedInLineTankLiquid1x2.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        },
+        {
+          "id": "PipeLiquid-Output-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Output",
+          "label": "Liquid out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitInsulatedPipeUtilityLiquid",
+          "quantity": 2
+        }
+      ]
+    },
+    "StructureInsulatedInLineTankLiquid1x3": {
+      "prefab": "StructureInsulatedInLineTankLiquid1x3",
+      "hash": 562723635,
+      "name": "In-Line Tank Liquid 1x3 (Insulated)",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInsulatedInLineTankLiquid1x3.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        },
+        {
+          "id": "PipeLiquid-Output-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Output",
+          "label": "Liquid out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitInsulatedPipeUtilityLiquid",
+          "quantity": 3
+        }
+      ]
+    },
+    "StructureInsulatedTankConnector": {
+      "prefab": "StructureInsulatedTankConnector",
+      "hash": -31273349,
+      "name": "Insulated Tank Connector",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureInsulatedTankConnector.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [
+        {
+          "name": "Portable slot",
+          "type": "None"
+        }
+      ],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPortablesConnector",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureInsulatedTankConnectorLiquid": {
+      "prefab": "StructureInsulatedTankConnectorLiquid",
+      "hash": -1602030414,
+      "name": "Insulated Tank Connector Liquid",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureInsulatedTankConnectorLiquid.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [
+        {
+          "name": "Portable slot",
+          "type": "None"
+        }
+      ],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPortablesConnector",
           "quantity": 1
         }
       ]
@@ -17052,7 +17795,15 @@
       "description": "A simple heat exchanger, pipe radiators can be placed on pipes to shed or gain heat, depending on the temperature of the surrounding atmosphere. If the atmosphere is hotter, heat will be added to the liquid within the pipe network, and visa versa if colder. In a vacuum, heat will be radiated. \nThe speed of heat gain or loss will depend on the liquid in question. Adding multiple radiators will speed up heat transfer.",
       "category": "Liquids",
       "icon": "data/icons/StructureLiquidPipeRadiator.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "PipeLiquid-None-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -17117,6 +17868,114 @@
       "build": [
         {
           "item": "ItemKitLiquidRegulator",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureLiquidTankBigInLine": {
+      "prefab": "StructureLiquidTankBigInLine",
+      "hash": -379100663,
+      "name": "Liquid Tank Big",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureLiquidTankBigInLine.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitLiquidTank",
+          "quantity": 5
+        }
+      ]
+    },
+    "StructureLiquidTankBigInsulatedInLine": {
+      "prefab": "StructureLiquidTankBigInsulatedInLine",
+      "hash": -886522270,
+      "name": "Liquid Tank Big (Insulated)",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureLiquidTankBigInsulatedInLine.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitLiquidTankInsulated",
+          "quantity": 5
+        }
+      ]
+    },
+    "StructureLiquidTankSmallInLine": {
+      "prefab": "StructureLiquidTankSmallInLine",
+      "hash": 659423177,
+      "name": "Liquid Tank Small",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureLiquidTankSmallInLine.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitLiquidTank",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureLiquidTankSmallInsulatedInLine": {
+      "prefab": "StructureLiquidTankSmallInsulatedInLine",
+      "hash": -2025519844,
+      "name": "Liquid Tank Small (Insulated)",
+      "description": "",
+      "category": "Liquids",
+      "icon": "data/icons/StructureLiquidTankSmallInsulatedInLine.webp",
+      "ports": [
+        {
+          "id": "PipeLiquid-Input-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "Input",
+          "label": "Liquid in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitLiquidTankInsulated",
           "quantity": 1
         }
       ]
@@ -20505,7 +21364,15 @@
       "description": "Moves liquids from a pipe network to the world atmosphere.",
       "category": "Liquids",
       "icon": "data/icons/StructurePassiveLiquidDrain.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "PipeLiquid-None-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -20517,6 +21384,87 @@
       "build": [
         {
           "item": "ItemLiquidDrain",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructurePassiveVent": {
+      "prefab": "StructurePassiveVent",
+      "hash": 335498166,
+      "name": "Passive Vent",
+      "description": "Passive vents allow gases to move into and out of pipe networks, which are closed systems unless connected to a device or structure. Passive vents are not powered, merely an aperture, essentially turning an enclosed space into part of the pipe network.",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructurePassiveVent.webp",
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemPassiveVent",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructurePassiveVentInsulated": {
+      "prefab": "StructurePassiveVentInsulated",
+      "hash": 1363077139,
+      "name": "Insulated Passive Vent",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructurePassiveVentInsulated.webp",
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemPassiveVentInsulated",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructurePassiveVentValve": {
+      "prefab": "StructurePassiveVentValve",
+      "hash": -75599100,
+      "name": "Passive Vent (Valve)",
+      "description": "Passive vents (Valve) allow gasses to move into and out of pipe networks, which are closed systems unless connected to a device or structure. Passive vents are not powered, but allow the user to choose when to allow gases in an enclosed space to mix inside a pipe network.",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructurePassiveVentValve.webp",
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemPassiveVent",
           "quantity": 1
         }
       ]
@@ -20769,6 +21717,33 @@
         }
       ]
     },
+    "StructurePipeCowl": {
+      "prefab": "StructurePipeCowl",
+      "hash": 465816159,
+      "name": "Passive Vent (Pipe Cowl)",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructurePipeCowl.webp",
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemPipeCowl",
+          "quantity": 1
+        }
+      ]
+    },
     "StructurePipeHeater": {
       "prefab": "StructurePipeHeater",
       "hash": -419758574,
@@ -20896,7 +21871,15 @@
       "description": "While the Stationeers program has, thus far, inspired little in the way of classical poetry, the following haiku was found etched, ironically, on a piece of pipe wreckage found on Vulcan:\n\"Humble pipe meter\nspeaks the truth, transmits pressure\nwithin any pipe\"",
       "category": "Sensors",
       "icon": "data/icons/StructurePipeMeter.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -20954,6 +21937,43 @@
         }
       ]
     },
+    "StructurePipeOrgan": {
+      "prefab": "StructurePipeOrgan",
+      "hash": 1305252611,
+      "name": "Pipe Organ",
+      "description": "The pipe organ can be attached to one end of a Kit (Pipe Valve). The length of the pipe after the pipe organ changes the pitch of the note it will play when the valve is opened. Use Logic to open and close the valves to create some custom tunes for your base or an audible warning.",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructurePipeOrgan.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        },
+        {
+          "id": "Pipe-Output-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Output",
+          "label": "Pipe out"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {
+        "0": "Mode0",
+        "1": "Mode1"
+      },
+      "build": [
+        {
+          "item": "ItemKitPipeOrgan",
+          "quantity": 1
+        }
+      ]
+    },
     "StructurePipeRadiator": {
       "prefab": "StructurePipeRadiator",
       "hash": 1696603168,
@@ -20961,7 +21981,15 @@
       "description": "A simple heat exchanger, pipe radiators can be placed on pipes to shed or gain heat, depending on the temperature of the surrounding atmosphere. If the atmosphere is hotter, heat will be added the gas within the pipe network, and visa versa if colder. In a vacuum, heat will be radiated. \nThe speed of heat gain or loss will depend on the gas in question. Adding multiple radiators will speed up heat transfer.",
       "category": "Atmospherics",
       "icon": "data/icons/StructurePipeRadiator.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -20984,7 +22012,15 @@
       "description": "A pipe mounted radiator optimized for radiating heat in vacuums.",
       "category": "Atmospherics",
       "icon": "data/icons/StructurePipeRadiatorFlat.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "Pipe-None-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "None",
+          "label": "Pipe"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -21007,7 +22043,15 @@
       "description": "A liquid pipe mounted radiator optimized for radiating heat in vacuums.",
       "category": "Liquids",
       "icon": "data/icons/StructurePipeRadiatorFlatLiquid.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "PipeLiquid-None-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -21131,6 +22175,33 @@
       "build": [
         {
           "item": "ItemPowerConnector",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructurePowerPylonTerminus": {
+      "prefab": "StructurePowerPylonTerminus",
+      "hash": -1234910677,
+      "name": "Power Pylon Terminus",
+      "description": "Ties a pylon line into an ordinary cable network.\n\nThe terminus counts as a length of super heavy cable, so everything reachable through the line becomes one network with everything wired to the terminus.\n\nIt has a single node, which takes one run of Cable Coil (Super Heavy). A terminus cannot link straight to another terminus; the run has to pass through at least one Power Pylon.",
+      "category": "Power",
+      "icon": "data/icons/StructurePowerPylonTerminus.webp",
+      "ports": [
+        {
+          "id": "Power-None-0",
+          "kind": "Power",
+          "network": "Power",
+          "role": "None",
+          "label": "Power"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitPowerPylon",
           "quantity": 1
         }
       ]
@@ -29617,6 +30688,114 @@
         }
       ]
     },
+    "StructureTankBigInLine": {
+      "prefab": "StructureTankBigInLine",
+      "hash": -327575161,
+      "name": "Large Tank",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureTankBigInLine.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitTank",
+          "quantity": 5
+        }
+      ]
+    },
+    "StructureTankBigInsulatedInLine": {
+      "prefab": "StructureTankBigInsulatedInLine",
+      "hash": -1601037437,
+      "name": "Tank Big (Insulated)",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureTankBigInsulatedInLine.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitTankInsulated",
+          "quantity": 5
+        }
+      ]
+    },
+    "StructureTankSmallInLine": {
+      "prefab": "StructureTankSmallInLine",
+      "hash": -1474141050,
+      "name": "Small Tank",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureTankSmallInLine.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitTank",
+          "quantity": 1
+        }
+      ]
+    },
+    "StructureTankSmallInsulatedInLine": {
+      "prefab": "StructureTankSmallInsulatedInLine",
+      "hash": 1721564012,
+      "name": "Tank Small (Insulated)",
+      "description": "",
+      "category": "Atmospherics",
+      "icon": "data/icons/StructureTankSmallInsulatedInLine.webp",
+      "ports": [
+        {
+          "id": "Pipe-Input-0",
+          "kind": "Pipe",
+          "network": "Pipe",
+          "role": "Input",
+          "label": "Pipe in"
+        }
+      ],
+      "logic": {},
+      "slotLogic": {},
+      "slots": [],
+      "modes": {},
+      "build": [
+        {
+          "item": "ItemKitTankInsulated",
+          "quantity": 1
+        }
+      ]
+    },
     "StructureToiletModern": {
       "prefab": "StructureToiletModern",
       "hash": 768716816,
@@ -32876,7 +34055,15 @@
       "description": "",
       "category": "Sensors",
       "icon": "data/icons/StructureWaterPipeMeter.webp",
-      "ports": [],
+      "ports": [
+        {
+          "id": "PipeLiquid-None-0",
+          "kind": "PipeLiquid",
+          "network": "PipeLiquid",
+          "role": "None",
+          "label": "Liquid"
+        }
+      ],
       "logic": {
         "NameHash": "r",
         "PrefabHash": "r",
@@ -33506,6 +34693,16 @@
       "name": "Kit (Insulated Pipe)",
       "icon": "data/icons/ItemKitInsulatedPipe.webp"
     },
+    "ItemKitInsulatedPipeUtility": {
+      "prefab": "ItemKitInsulatedPipeUtility",
+      "name": "Kit (Insulated Pipe Utility Gas)",
+      "icon": "data/icons/ItemKitInsulatedPipeUtility.webp"
+    },
+    "ItemKitInsulatedPipeUtilityLiquid": {
+      "prefab": "ItemKitInsulatedPipeUtilityLiquid",
+      "name": "Kit (Insulated Pipe Utility Liquid)",
+      "icon": "data/icons/ItemKitInsulatedPipeUtilityLiquid.webp"
+    },
     "ItemKitInteriorDoors": {
       "prefab": "ItemKitInteriorDoors",
       "name": "Kit (Interior Doors)",
@@ -33565,6 +34762,16 @@
       "prefab": "ItemKitLiquidRegulator",
       "name": "Kit (Liquid Regulator)",
       "icon": "data/icons/ItemKitLiquidRegulator.webp"
+    },
+    "ItemKitLiquidTank": {
+      "prefab": "ItemKitLiquidTank",
+      "name": "Kit (Liquid Tank)",
+      "icon": "data/icons/ItemKitLiquidTank.webp"
+    },
+    "ItemKitLiquidTankInsulated": {
+      "prefab": "ItemKitLiquidTankInsulated",
+      "name": "Kit (Insulated Liquid Tank)",
+      "icon": "data/icons/ItemKitLiquidTankInsulated.webp"
     },
     "ItemKitLiquidTurboVolumePump": {
       "prefab": "ItemKitLiquidTurboVolumePump",
@@ -33636,6 +34843,11 @@
       "name": "Kit (Liquid Pipe)",
       "icon": "data/icons/ItemKitPipeLiquid.webp"
     },
+    "ItemKitPipeOrgan": {
+      "prefab": "ItemKitPipeOrgan",
+      "name": "Kit (Pipe Organ)",
+      "icon": "data/icons/ItemKitPipeOrgan.webp"
+    },
     "ItemKitPipeRadiator": {
       "prefab": "ItemKitPipeRadiator",
       "name": "Kit (Pipe Radiator)",
@@ -33660,6 +34872,11 @@
       "prefab": "ItemKitPortablesConnector",
       "name": "Kit (Portables Connector)",
       "icon": "data/icons/ItemKitPortablesConnector.webp"
+    },
+    "ItemKitPowerPylon": {
+      "prefab": "ItemKitPowerPylon",
+      "name": "Kit (Power Pylon)",
+      "icon": "data/icons/ItemKitPowerPylon.webp"
     },
     "ItemKitPowerTransmitter": {
       "prefab": "ItemKitPowerTransmitter",
@@ -33901,6 +35118,16 @@
       "name": "Kit (Tables)",
       "icon": "data/icons/ItemKitTables.webp"
     },
+    "ItemKitTank": {
+      "prefab": "ItemKitTank",
+      "name": "Kit (Tank)",
+      "icon": "data/icons/ItemKitTank.webp"
+    },
+    "ItemKitTankInsulated": {
+      "prefab": "ItemKitTankInsulated",
+      "name": "Kit (Insulated Tank)",
+      "icon": "data/icons/ItemKitTankInsulated.webp"
+    },
     "ItemKitToilet": {
       "prefab": "ItemKitToilet",
       "name": "Kit (Toilet)",
@@ -33996,10 +35223,20 @@
       "name": "Kit (Passive Vent)",
       "icon": "data/icons/ItemPassiveVent.webp"
     },
+    "ItemPassiveVentInsulated": {
+      "prefab": "ItemPassiveVentInsulated",
+      "name": "Kit (Insulated Passive Vent)",
+      "icon": "data/icons/ItemPassiveVentInsulated.webp"
+    },
     "ItemPipeAnalyizer": {
       "prefab": "ItemPipeAnalyizer",
       "name": "Kit (Pipe Analyzer)",
       "icon": "data/icons/ItemPipeAnalyizer.webp"
+    },
+    "ItemPipeCowl": {
+      "prefab": "ItemPipeCowl",
+      "name": "Pipe Cowl",
+      "icon": "data/icons/ItemPipeCowl.webp"
     },
     "ItemPipeDigitalValve": {
       "prefab": "ItemPipeDigitalValve",
