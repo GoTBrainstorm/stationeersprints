@@ -258,7 +258,7 @@ exception: its cable networks are the subject, so neither is dimmed.
 ## Conventions
 
 - **Import extensions**: none in `src/` (bundler resolution), explicit `.ts` in `tools/` (nodenext — `npm run extract` runs Node directly on the TypeScript).
-- **Styling**: one plain stylesheet, `src/styles.css`, with `className` strings. No CSS modules, no Tailwind, no styled-components. Port colors are driven by `port-<PortKind>` classes shared between nodes and the footer legend.
+- **Styling**: one plain stylesheet, `src/styles.css`, with `className` strings. No CSS modules, no Tailwind, no styled-components. Port colors are driven by `port-<PortKind>` classes shared between nodes and the footer legend. The one custom React Flow edge, `InsulatedEdge.tsx`, exists because the PNG export constrains what a style can be: `inlineSvgPaint()` copies only the paint properties in its allowlist, so a `filter` or `mask` looks right on screen and vanishes from the image — but it walks every `svg *` descendant, so a second `<path>` is carried for free. Reach for the extra path, not the effect.
 - **Store access**: `useStore((s) => …)` selectors for reactive reads; `useStore.getState()` for actions and one-off reads. Keep selectors returning primitives or stable references — see the `.join('|')` trick at `DeviceNode.tsx:22`.
 - **Comments explain *why*, not *what*.** The existing ones document non-obvious decisions (why logic arrows point the way they do, why frozen zones need `draggable: false`, why `Other` ports never connect to each other). Match that; don't narrate the code.
 - **Storage is best-effort.** Every `localStorage` access is wrapped in `try/catch` because private mode and blocked cookies must not break editing. Keep that.

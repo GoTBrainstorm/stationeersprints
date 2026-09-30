@@ -53,6 +53,7 @@ function DeviceNodeView({ id, data, selected }: NodeProps<DeviceNodeType>) {
           {data.label && <div className="device-subtitle">{device.name}</div>}
         </div>
       </div>
+      {data.insulated && <div className="device-insulated">Insulated</div>}
       {summary && (
         <div className="device-summary">
           {summary.split('\n').map((l, i) => (

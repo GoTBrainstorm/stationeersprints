@@ -22,6 +22,11 @@ export function isBuiltin(prefab: string): boolean {
   return prefab.startsWith('@')
 }
 
+/** Insulation is a property of a gas or liquid pipe run; a cable network has no equivalent. */
+export function isPipeNetwork(device: CatalogDevice): boolean {
+  return isBuiltin(device.prefab) && device.ports.some((p) => p.kind === 'Pipe' || p.kind === 'PipeLiquid')
+}
+
 const KIND_BY_NETWORK: Record<string, PortKind> = {
   Power: 'Power',
   Data: 'Data',

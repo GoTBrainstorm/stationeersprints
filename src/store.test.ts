@@ -143,26 +143,33 @@ describe('document epoch', () => {
 })
 
 // toBlueprint/fromBlueprint is the seam where a node field added to only one side
-// vanishes on save, without failing anything else. `dim` is the newest such field.
+// vanishes on save, without failing anything else. `insulated` is the newest such field.
 describe('device node round-trip through the store', () => {
-  const withNet = (dim?: boolean): Blueprint => ({
+  const withNet = (flags: { dim?: boolean; insulated?: boolean } = {}, prefab = '@CableNetwork'): Blueprint => ({
     ...emptyBlueprint(),
-    nodes: [{ id: 'c', type: 'device', x: 0, y: 0, prefab: '@CableNetwork', portSide: 'top', ...(dim ? { dim: true } : {}) }],
+    nodes: [{ id: 'c', type: 'device', x: 0, y: 0, prefab, portSide: 'top', ...(flags.dim ? { dim: true } : {}), ...(flags.insulated ? { insulated: true } : {}) }],
     edges: [],
   })
 
   it('preserves a dimmed network node', () => {
-    start(withNet(true))
+    start(withNet({ dim: true }))
     const out = toBlueprint(useStore.getState()).nodes[0] as BpDeviceNode
     expect(out.dim).toBe(true)
     expect(out.portSide).toBe('top')
   })
 
+  it('preserves an insulated pipe network', () => {
+    start(withNet({ insulated: true }, '@PipeNetwork'))
+    expect((toBlueprint(useStore.getState()).nodes[0] as BpDeviceNode).insulated).toBe(true)
+  })
+
   // Absent, not `false`: the format omits falsey optionals so a share link stays short
   // and an untouched document serializes byte-identically.
-  it('emits no dim key when the node is not dimmed', () => {
+  it('emits no dim or insulated key when neither is set', () => {
     start(withNet())
-    expect('dim' in (toBlueprint(useStore.getState()).nodes[0] as BpDeviceNode)).toBe(false)
+    const out = toBlueprint(useStore.getState()).nodes[0] as BpDeviceNode
+    expect('dim' in out).toBe(false)
+    expect('insulated' in out).toBe(false)
   })
 
   it('makes dimming undoable', () => {
@@ -171,6 +178,14 @@ describe('device node round-trip through the store', () => {
     expect((useStore.getState().nodes[0].data as { dim?: boolean }).dim).toBe(true)
     useStore.getState().undo()
     expect((useStore.getState().nodes[0].data as { dim?: boolean }).dim).toBeUndefined()
+  })
+
+  it('makes insulating undoable', () => {
+    start(withNet({}, '@PipeNetwork'))
+    useStore.getState().updateData('c', { insulated: true })
+    expect((useStore.getState().nodes[0].data as { insulated?: boolean }).insulated).toBe(true)
+    useStore.getState().undo()
+    expect((useStore.getState().nodes[0].data as { insulated?: boolean }).insulated).toBeUndefined()
   })
 })
 

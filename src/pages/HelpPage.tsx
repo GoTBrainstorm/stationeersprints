@@ -47,7 +47,9 @@ export function HelpContent() {
         <li>
           <strong>Network helpers</strong> (cable network, pipe network, liquid network) stand in for "everything on
           this network" so you don't have to draw every branch. They are at the top of the palette, and the inspector
-          lets you choose which side their connector sits on.
+          lets you choose which side their connector sits on. A gas or liquid network can also be marked{' '}
+          <em>insulated</em>, which draws its runs wrapped in lagging — insulated pipe barely exchanges heat with the
+          room it passes through, so it is often the difference between two otherwise identical designs.
         </li>
         <li>
           <strong>Notes and zones</strong> are for explaining the drawing. A note can carry a step number; a zone is a

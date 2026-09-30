@@ -13,6 +13,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import './styles.css'
 import DeviceNode from './components/DeviceNode'
+import InsulatedEdge from './components/InsulatedEdge'
 import { NoteNode, ZoneNode } from './components/NoteNode'
 import Palette, { DRAG_MIME, type PaletteItem } from './components/Palette'
 import Inspector from './components/Inspector'
@@ -43,6 +44,7 @@ import { newId, toBlueprint, useStore, zonesFrozen, type AppEdge, type AppNode }
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 
 const nodeTypes = { device: DeviceNode, note: NoteNode, zone: ZoneNode }
+const edgeTypes = { insulated: InsulatedEdge }
 const AUTOSAVE_KEY = 'stationeersprints:autosave'
 
 // Telling someone their phone is the wrong tool is worth doing once, not every visit.
@@ -117,15 +119,24 @@ function Canvas() {
   const dimmedKey = useStore((s) => s.nodes.flatMap((n) => (n.type === 'device' && n.data.dim ? [n.id] : [])).join('|'))
   const dimmed = useMemo(() => new Set(dimmedKey ? dimmedKey.split('|') : []), [dimmedKey])
 
+  // Pipe networks the author has marked insulated. Joined string for the same reason as `dimmedKey`.
+  const insulatedKey = useStore((s) => s.nodes.flatMap((n) => (n.type === 'device' && n.data.insulated ? [n.id] : [])).join('|'))
+  const insulated = useMemo(() => new Set(insulatedKey ? insulatedKey.split('|') : []), [insulatedKey])
+
   const allEdges = useMemo(
     () => [
       ...edges.map((e) => {
         const faded = dimmed.has(e.source) || dimmed.has(e.target)
-        return { ...e, className: `edge-${e.data?.kind ?? 'Other'}${faded ? ' edge-dim' : ''}` }
+        const jacket = insulated.has(e.source) || insulated.has(e.target)
+        return {
+          ...e,
+          type: jacket ? 'insulated' : e.type,
+          className: `edge-${e.data?.kind ?? 'Other'}${faded ? ' edge-dim' : ''}`,
+        }
       }),
       ...logicEdges,
     ],
-    [edges, logicEdges, dimmed],
+    [edges, logicEdges, dimmed, insulated],
   )
 
   const onDrop = useCallback(
@@ -144,6 +155,7 @@ function Canvas() {
         nodes={flowNodes}
         edges={allEdges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -497,7 +509,7 @@ function Editor({ publishedId }: { publishedId: string | null }) {
         <span>
           <span className="legend port-Power" /> Power <span className="legend port-Data" /> Data <span className="legend port-PowerAndData" /> Power+Data{' '}
           <span className="legend port-Pipe" /> Pipe <span className="legend port-PipeLiquid" /> Liquid <span className="legend port-Chute" /> Chute{' '}
-          <span className="legend logic" /> Logic link
+          <span className="legend logic" /> Logic link <span className="legend insulated port-Pipe" /> Insulated
         </span>
         <span className="muted">{catalog ? `Stationeers ${catalog.gameVersion}` : 'Loading catalog…'} · Fan-made, not affiliated with RocketWerkz</span>
       </footer>

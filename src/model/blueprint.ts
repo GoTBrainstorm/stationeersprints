@@ -24,6 +24,11 @@ export interface BpDeviceNode {
   portSide?: PortSide
   /** Draw this node's connections faded, so a busy power/data hub recedes behind the logic. */
   dim?: boolean
+  /**
+   * Draw this pipe network's runs as insulated pipe. Annotation only: insulated and bare pipe join
+   * the same network in game, so it never affects which ports may connect.
+   */
+  insulated?: boolean
   note?: string
 }
 

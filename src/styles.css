@@ -197,6 +197,13 @@ fieldset:disabled textarea {
 .legend.logic {
   background: repeating-linear-gradient(90deg, var(--logic) 0 3px, transparent 3px 6px);
 }
+/* Mirrors the rung-dashed jacket insulated runs are drawn with — see .edge-jacket. */
+.legend.insulated {
+  width: 18px;
+  height: 7px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--muted) 0 3px, var(--port-color) 3px 8px);
+}
 
 /* Palette ----------------------------------------------------------------- */
 .palette {
@@ -473,6 +480,15 @@ fieldset:disabled textarea {
   font-size: 11px;
   color: var(--muted);
 }
+/* Tag on a pipe network whose runs are drawn insulated. Deliberately small and unboxed, unlike
+   .device-summary — it has to sit inside the 150px network pill without adding a second row. */
+.device-insulated {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 .device-summary {
   margin-top: 6px;
   padding: 4px 6px;
@@ -635,16 +651,30 @@ fieldset:disabled textarea {
 .edge-Other .react-flow__edge-path {
   stroke: var(--other);
 }
+/* The lagging on an insulated run: a wide jacket dashed into short rungs, painted under the core by
+   InsulatedEdge. A second path and not a `filter` or a `mask`, neither of which the PNG export can
+   inline — see inlineSvgPaint.ts. Scoped to the two pipe kinds, so a stray flag on a cable network
+   leaves the jacket strokeless and invisible rather than drawing a lie. */
+.edge-Pipe .edge-jacket,
+.edge-PipeLiquid .edge-jacket {
+  stroke: var(--muted);
+  stroke-opacity: 0.45;
+  stroke-width: 13;
+  stroke-dasharray: 4 7;
+  stroke-linecap: butt;
+}
 /* Connections of a network node the author has dimmed. `opacity` and not `filter`,
    because the PNG export only inlines the properties in inlineSvgPaint's list. */
-.edge-dim .react-flow__edge-path {
+.edge-dim .react-flow__edge-path,
+.edge-dim .edge-jacket {
   opacity: 0.25;
 }
 .react-flow__edge.selected .react-flow__edge-path {
   stroke: var(--accent-2);
 }
 /* A dimmed line the user has actually clicked comes back, or it can't be inspected or deleted. */
-.react-flow__edge.selected.edge-dim .react-flow__edge-path {
+.react-flow__edge.selected.edge-dim .react-flow__edge-path,
+.react-flow__edge.selected.edge-dim .edge-jacket {
   opacity: 1;
 }
 .edge-logic .react-flow__edge-path {

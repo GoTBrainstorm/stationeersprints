@@ -22,7 +22,7 @@ export const roomCooling: Example = {
     dev('wHeat', 'StructureLogicWriter', 960, 300, { label: 'Heater on/off', settings: { input: ref('cmpCold'), device: ref('heater'), variable: 'On' } }),
     dev('cooler', 'StructureWallCooler', 1280, 20),
     dev('heater', 'StructureWallHeater', 1280, 400),
-    net('loop', '@PipeNetwork', 'Coolant loop → radiators', 1600, 20, 'left'),
+    { ...net('loop', '@PipeNetwork', 'Coolant loop → radiators', 1600, 20, 'left'), insulated: true },
     net('net', '@CableNetwork', 'Power + data', 640, 560, 'top', true),
     ...steps(0, 780, [
       'Mount the Wall Cooler on an inside wall. Run its pipe to radiators outside and fill the loop with a gas (CO₂ or N₂ works). No gas = no cooling.',

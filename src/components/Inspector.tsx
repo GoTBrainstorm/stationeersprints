@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { iconUrl, isBuiltin, lookupDevice } from '../model/catalog'
+import { iconUrl, isBuiltin, isPipeNetwork, lookupDevice } from '../model/catalog'
 import type { Catalog, CatalogDevice } from '../model/catalogTypes'
 import { isRef, PORT_SIDES, type PortSide, type SettingValue } from '../model/blueprint'
 import { BATCH_METHODS, nodeTitle, schemaFor, settableVars, slotVarsOf, varsOf, type Field } from '../model/settings'
@@ -223,6 +223,11 @@ function DeviceInspector({ node }: { node: DeviceNodeType }) {
             <Row label="Dim links" hint="Fade this network's connections so the logic and pipe runs read first. They stay visible, and a line comes back to full strength when you select it.">
               <input type="checkbox" checked={node.data.dim ?? false} onChange={(e) => updateData(node.id, { dim: e.target.checked || undefined })} />
             </Row>
+            {isPipeNetwork(device) && (
+              <Row label="Insulated" hint="Draw this network's runs as insulated pipe. Insulated pipe barely exchanges heat with the room it passes through, so a loop marked here behaves very differently from one built of bare pipe.">
+                <input type="checkbox" checked={node.data.insulated ?? false} onChange={(e) => updateData(node.id, { insulated: e.target.checked || undefined })} />
+              </Row>
+            )}
           </>
         )}
       </section>

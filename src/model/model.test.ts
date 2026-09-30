@@ -14,6 +14,7 @@ const bp: Blueprint = {
     { id: 'a', type: 'device', x: 0, y: 0, prefab: 'StructureDaylightSensor' },
     { id: 'b', type: 'device', x: 100, y: 0, prefab: 'StructureLogicReader', settings: { device: { ref: 'a' }, variable: 'Horizontal' } },
     { id: 'c', type: 'device', x: 200, y: 0, prefab: '@CableNetwork', label: 'Power + data', portSide: 'top', dim: true },
+    { id: 'p', type: 'device', x: 300, y: 0, prefab: '@PipeNetwork', label: 'Coolant loop', portSide: 'left', insulated: true },
     { id: 'n', type: 'note', x: 0, y: 100, text: 'Hello ☀', step: 1 },
     { id: 'z', type: 'zone', x: -10, y: -10, width: 400, height: 300, title: 'Outside' },
   ],

@@ -23,6 +23,7 @@ export type DeviceData = {
   values: Record<string, string>
   portSide?: PortSide
   dim?: boolean
+  insulated?: boolean
   note?: string
 }
 export type NoteData = { text: string; step?: number }
@@ -157,6 +158,7 @@ export function toBlueprint(s: Pick<State, 'nodes' | 'edges' | 'meta' | 'catalog
         ...(Object.keys(d.values).length ? { values: d.values } : {}),
         ...(d.portSide ? { portSide: d.portSide } : {}),
         ...(d.dim ? { dim: true } : {}),
+        ...(d.insulated ? { insulated: true } : {}),
         ...(d.note ? { note: d.note } : {}),
       }
     }
@@ -208,6 +210,7 @@ export function fromBlueprint(bp: Blueprint, catalog: Catalog | null): Snapshot 
           values: n.values ?? {},
           portSide: isPortSide(n.portSide) ? n.portSide : undefined,
           dim: n.dim === true ? true : undefined,
+          insulated: n.insulated === true ? true : undefined,
           note: n.note,
         },
       }
