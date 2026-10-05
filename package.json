@@ -29,17 +29,17 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260927.1",
-    "@types/node": "^26.6.3",
+    "@cloudflare/workers-types": "^5.20261002.1",
+    "@types/node": "^26.6.4",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "fast-xml-parser": "^5.11.1",
-    "oxlint": "^1.81.0",
-    "sharp": "^0.35.4",
+    "fast-xml-parser": "^5.11.2",
+    "oxlint": "^1.86.0",
+    "sharp": "^0.35.5",
     "typescript": "~7.0.2",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3",
     "wrangler": "^4.141.0"
   }
 }
